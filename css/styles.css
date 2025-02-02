@@ -1,0 +1,101 @@
+:root {
+  --prim-a: #fff;
+  --prim-b: #000;
+  /* --min-cell: calc(100vw / 6); */
+  --min-cell: 100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  background: var(--prim-b);
+
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+}
+
+/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
+/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3.5vh;
+
+  height: 20vh;
+  max-height: 120px;
+
+  background: var(--prim-a);
+}
+
+header #netizen-logo {
+  height: 100%;
+  cursor: pointer;
+}
+
+header nav span {
+  cursor: pointer;
+  border-radius: 1em;
+  padding: 0.25em 0.5em;
+  border: 1px solid transparent;
+  margin: 0 1em;
+}
+
+header nav span:hover {
+  border: 1px solid var(--prim-b);
+}
+
+/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
+/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+
+.sxn-grid {
+  background-color: #ff9999;
+  /* height: 50vh; */
+}
+
+.sxn-grid ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--min-cell), 1fr));
+  grid-auto-rows: var(--min-cell);
+  grid-auto-flow: dense;
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  overflow: hidden;
+  padding: 0.5em;
+
+  transition: all 0.5s;
+}
+
+img {
+  display: block;
+  -o-object-fit: cover;
+  object-fit: cover;
+  height: 100%;
+}
+
+/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
+/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+
+footer {
+  /* position: absolute;
+  bottom: 0px; */
+
+  width: 100vw;
+  padding: 1em 2em;
+
+  color: var(--prim-a);
+  background-color: var(--prim-b);
+}
+
+.wordmark {
+  font-size: 2em;
+}
