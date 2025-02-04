@@ -32,9 +32,37 @@ function createGrid () {
   }
 }
 
+function setupControls () {
+  // update settings
+  nn.get('#about-link').on('click', () => {
+    nn.get('.settings').classList.toggle('settings-show')
+  })
+  nn.get('.settings h3').on('click', () => {
+    nn.get('.settings').classList.toggle('settings-show')
+  })
+  // handle checkbox
+  nn.get('#min-cell-range').on('change', () => {
+    nn.get('#responsive-lock').checked = false
+  })
+  nn.get('#responsive-lock').checked = false
+  nn.get('#responsive-lock').on('change', (e) => {
+    if (e.target.checked) {
+      const minCell = nn.get('#min-cell-range').value
+      nn.get('#responsive-lock').dataset.val = `${minCell}px`
+      const val = `${parseInt(minCell) / nn.width * 100}vw`
+      document.documentElement.style.setProperty('--min-cell', val)
+    } else {
+      const val = nn.get('#responsive-lock').dataset.val
+      document.documentElement.style.setProperty('--min-cell', val)
+    }
+  })
+}
+
 function main () {
+  nn.bindCSS()
   createGrid()
   nn.get('#netizen-logo').on('click', createGrid)
+  setupControls()
 }
 
 nn.on('load', main)

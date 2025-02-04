@@ -24,7 +24,7 @@
     <header>
       <img id="netizen-logo" src="images/logo-temp.png" alt="netizen.org logo">
       <nav>
-        <span>About</span>
+        <span id="about-link">About</span>
         <span>Initiatives</span>
         <span>Support</span>
       </nav>
@@ -42,6 +42,14 @@
         <div class="slogan">bent on bending tech</div>
       </div>
     </footer>
+
+    <section class="settings">
+      <div>
+        <h3>grid settings (close)</h3>
+        <input type="range" id="min-cell-range" data-bind-var="--min-cell" min="10" max="300"> cell size<br>
+        <input type="checkbox" id="responsive-lock" checked="false"> responsive lock
+      </div>
+    </section>
 
     <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
     <script src="js/main.js"></script>

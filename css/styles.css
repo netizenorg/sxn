@@ -99,3 +99,32 @@ footer {
 .wordmark {
   font-size: 2em;
 }
+
+/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
+/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+
+.settings {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+
+.settings-show {
+  display: flex;
+  justify-content: center;
+  align-items: center
+}
+
+.settings > div {
+  max-width: 800px;
+  padding: 20px;
+  background: #fff;
+}
+
+.settings h3 {
+  cursor: pointer;
+}
