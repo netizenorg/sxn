@@ -11,36 +11,60 @@
 
 html, body {
   margin: 0;
-  background: var(--prim-b);
+  background: var(--prim-a);
 
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-weight: 300;
+  font-family: 'Zen Maru Gothic', serif;
+  /* font-weight: 300; */
 }
-
 /* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
 /* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
 
+#splash {
+  background-image: url('/images/walking-tour/netwalkingtour4.jpg');
+  background-size: cover; /* Ensures the image covers the entire element */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents tiling */
+  background-attachment: fixed; /* Optional: Keeps the image fixed while scrolling */
+
+  width: 100vw;
+  min-height: 87vh;
+
+  border-top-left-radius: 6vw;
+  border-top-right-radius: 6vw;
+  margin-top: 13vh;
+}
+
+
+
+/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
+/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+#netizen-logo {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  z-index: 100;
+  width: 100px;
+}
+
 header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 3.5vh;
 
   height: 20vh;
   max-height: 120px;
-
-  background: var(--prim-a);
-}
-
-header #netizen-logo {
-  height: 100%;
-  cursor: pointer;
 }
 
 header nav span {
   cursor: pointer;
-  border-radius: 1em;
-  padding: 0.25em 0.5em;
+  border-radius: 2em;
+  padding: 0.25em 1.3em 0.35em 1.3em;
   border: 1px solid transparent;
   margin: 0 1em;
 }
@@ -52,44 +76,12 @@ header nav span:hover {
 /* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
 /* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
 
-.sxn-grid {
-  background-color: #ff9999;
-  /* height: 50vh; */
-}
-
-.sxn-grid ul {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--min-cell), 1fr));
-  grid-auto-rows: var(--min-cell);
-  grid-auto-flow: dense;
-
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-li {
-  overflow: hidden;
-  padding: 0.5em;
-
-  transition: all 0.5s;
-}
-
-img {
-  display: block;
-  -o-object-fit: cover;
-  object-fit: cover;
-  height: 100%;
-}
-
-/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
-/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
-
 footer {
   /* position: absolute;
   bottom: 0px; */
 
   width: 100vw;
+  /* height: 500px; */
   padding: 1em 2em;
 
   color: var(--prim-a);
@@ -98,33 +90,4 @@ footer {
 
 .wordmark {
   font-size: 2em;
-}
-
-/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
-/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
-
-.settings {
-  display: none;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  position: fixed;
-  top: 0px;
-  left: 0px;
-}
-
-.settings-show {
-  display: flex;
-  justify-content: center;
-  align-items: center
-}
-
-.settings > div {
-  max-width: 800px;
-  padding: 20px;
-  background: #fff;
-}
-
-.settings h3 {
-  cursor: pointer;
 }
