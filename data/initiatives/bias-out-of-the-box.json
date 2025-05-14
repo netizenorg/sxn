@@ -1,0 +1,21 @@
+{
+  "title": "Bias Out of the Box",
+  "sub-title": "Unpacking Algorithms of Power",
+  "date": "Feb. 26-27, 2021",
+  "urls": {
+    "website": "https://netizen.org/bias-out-of-the-box/",
+    "event recap": "https://mailchi.mp/ac3317347e87/bias-out-of-the-box-recap"
+  },
+  "partners": ["the School of the Art Institute of Chicago", "the University of Chicago"],
+  "content": [
+    "Bias Out of the Box was a FREE/OPEN two day conversation series organized to unpack and discuss just how deeply <strong>algorithmic biases</strong> permeate our culture—and what we can do to bring light to this important issue.",
+    "What does it mean when artificial intelligence (AI) increasingly governs our liberties? And what are the consequences for the people AI is biased against?",
+    "The event is an opportunity to engage with the urgent themes covered in the award winning documentary <em>Coded Bias</em>.",
+    "<blockquote>When MIT Media Lab researcher Joy Buolamwini discovers that most facial-recognition software does not accurately identify darker-skinned faces and the faces of women, she delves into an investigation of widespread bias in algorithms. As it turns out, AI is not neutral, and women are leading the charge to ensure our civil rights are protected.</blockquote>"
+  ],
+  "grid": [
+    { "image": "/images/bias-box/panel.jpg" },
+    { "image": "/images/bias-box/joy.jpg" },
+    { "image": "/images/bias-box/zoom-window.jpg" }
+  ]
+}
