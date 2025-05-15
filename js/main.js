@@ -97,7 +97,7 @@ async function loadCaseStudy (data) {
     cells = countGridCells()
     gridHeight++
   } while (cells < min)
-  greyOutCells()
+  // greyOutCells()
 
   // populate grid
   nn.shuffle(data.grid).forEach(async obj => {
@@ -107,8 +107,8 @@ async function loadCaseStudy (data) {
       // cell.style.backgroundPosition = 'center'
       // cell.style.backgroundRepeat = 'no-repeat'
       cell.style.imageRendering = nn.browserInfo().name === 'Firefox' ? 'pixelated' : 'crisp-edges'
-      const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
-      cell.style.background = [`url(${dataURL}) center/cover no-repeat`, '#00f'].join(', ')
+      // const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
+      cell.style.background = [`url(${obj.image}) center/cover no-repeat`, '#00f'].join(', ')
       // cell.style.backgroundImage = `url(${dataURL})`
     }
     if (obj.title) {
@@ -126,7 +126,7 @@ async function loadCaseStudy (data) {
 
 async function generateCaseStudies (name) {
   const nav = nn.get('.splash-intro > nav')
-  const res = await window.fetch(`/data/initiatives/${name}.json`)
+  const res = await window.fetch(`../data/initiatives/${name}.json`)
   const json = await res.json()
   nn.create('span').content(json.title).addTo(nav)
     .on('click', () => loadCaseStudy(json))
