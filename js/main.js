@@ -97,20 +97,16 @@ async function loadCaseStudy (data) {
     cells = countGridCells()
     gridHeight++
   } while (cells < min)
-  // greyOutCells()
+  greyOutCells()
 
   // populate grid
   const root = window.location.toString()
   nn.shuffle(data.grid).forEach(async obj => {
     const cell = selectRandomEmptyCell()
     if (obj.image) {
-      // cell.style.backgroundSize = 'cover'
-      // cell.style.backgroundPosition = 'center'
-      // cell.style.backgroundRepeat = 'no-repeat'
       cell.style.imageRendering = nn.browserInfo().name === 'Firefox' ? 'pixelated' : 'crisp-edges'
-      // const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
-      cell.style.background = [`url(${root + obj.image}) center/cover no-repeat`, '#00f'].join(', ')
-      // cell.style.backgroundImage = `url(${dataURL})`
+      const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
+      cell.style.background = [`url(${dataURL}) center/cover no-repeat`, '#00f'].join(', ')
     }
     if (obj.title) {
       cell.classList.add('cs-cell-lnk')
