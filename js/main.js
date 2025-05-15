@@ -105,7 +105,7 @@ async function loadCaseStudy (data) {
     const cell = selectRandomEmptyCell()
     if (obj.image) {
       cell.style.imageRendering = nn.browserInfo().name === 'Firefox' ? 'pixelated' : 'crisp-edges'
-      const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
+      const dataURL = await makePixelatedDuotoneDataUrl(root + obj.image, 16)
       cell.style.background = [`url(${dataURL}) center/cover no-repeat`, '#00f'].join(', ')
     }
     if (obj.title) {
