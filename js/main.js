@@ -125,8 +125,9 @@ async function loadCaseStudy (data) {
 }
 
 async function generateCaseStudies (name) {
+  const root = window.location.toString()
   const nav = nn.get('.splash-intro > nav')
-  const res = await window.fetch(`../data/initiatives/${name}.json`)
+  const res = await window.fetch(`${root}/data/initiatives/${name}.json`)
   const json = await res.json()
   nn.create('span').content(json.title).addTo(nav)
     .on('click', () => loadCaseStudy(json))
