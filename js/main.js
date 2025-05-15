@@ -100,6 +100,7 @@ async function loadCaseStudy (data) {
   // greyOutCells()
 
   // populate grid
+  const root = window.location.toString()
   nn.shuffle(data.grid).forEach(async obj => {
     const cell = selectRandomEmptyCell()
     if (obj.image) {
@@ -108,7 +109,7 @@ async function loadCaseStudy (data) {
       // cell.style.backgroundRepeat = 'no-repeat'
       cell.style.imageRendering = nn.browserInfo().name === 'Firefox' ? 'pixelated' : 'crisp-edges'
       // const dataURL = await makePixelatedDuotoneDataUrl(obj.image, 16)
-      cell.style.background = [`url(${obj.image}) center/cover no-repeat`, '#00f'].join(', ')
+      cell.style.background = [`url(${root + obj.image}) center/cover no-repeat`, '#00f'].join(', ')
       // cell.style.backgroundImage = `url(${dataURL})`
     }
     if (obj.title) {
