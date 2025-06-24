@@ -1,172 +1,221 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>SxN Grid</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="grid"></div>
-    <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
-    <script src="js/dat.gui.min.js"></script>
-    <script>
+<style>
+  /* netnet default bg */
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    --size: 50px;
+    margin: 0;
+    background-image: linear-gradient(#eee 2px, transparent 1px),
+      linear-gradient(90deg, #eee 2px, transparent 1px);
+    background-size: var(--size) var(--size);
+    position: relative;
+    z-index: 1;
+    height: 200vh;
+  }
+  
+  .grid {
+    position: relative;
+    width: 1000px;
+    height: 600px;
+    margin: 50px;
+    background: #eee;
+  }
 
+  .grid div {
+    position: absolute;
+    padding: 10px;
+  }
+  
 
-      const colors = [
-        ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
-        ['#ff0000', '#ff0099', '#ff00ff', '#6600ff', '#0000ff', '#0099ff', '#00ffff', '#00ff66', '#00ff00', '#99ff00', '#ffff00', '#ff6600'],
-        ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
-      ]
+</style>
 
-      const settings = {
-        gridWidth: 6,
-        gridHeight: 6,
-        maxModuleHeight: 3,
-        cellSize: 100,
-        debug: false,
-        create: () => generateGrid(settings)
-      }
+<select id='esel'></select>
 
-      const gui = new dat.GUI()
-      gui.add(settings, 'cellSize', 10, 200, 1)
-      gui.add(settings, 'gridWidth', 1, 20, 1)
-      gui.add(settings, 'gridHeight', 1, 20, 1)
-      gui.add(settings, 'maxModuleHeight', 1, 6, 1)
-      gui.add(settings, 'debug')
-      gui.add(settings, 'create')
+<div class="grid">
+</div>
 
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+<script>
+/* global nn  */
+  
+  const easingOptions = [
+    'OutCubic', 'InOutQuart', 'OutQuint', 'OutBack', 'InOutBack', 'OutBounce'
+  ]
+  
+  let currentEase = 'OutCubic'
+  nn.get('#esel')
+    .set('options', easingOptions)
+    .on('change', () => { currentEase = nn.get('#esel').value })
 
+    
+  window.colors = [
+    ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
+    ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
+  ]
+  
+  const totalCols = 6
+  const totalRows = 4
+  const placed = []
 
-      function generateGrid (config) {
-        let {
-          gridWidth = 6,
-          gridHeight = 6,
-          maxModuleHeight = 3,
-          parentSel = '#grid',
-          cellSize = 100,
-          debug = false
-        } = config
+  const grid = [
+    { x: 0, y: 0, w: 1, h: 1 },
+    { x: 1, y: 0, w: 2, h: 1 },
+    
+    { x: 3, y: 0, w: 3, h: 2 },
+    { x: 3, y: 2, w: 3, h: 1 },
+    
+    { x: 0, y: 1, w: 2, h: 2 },
+    { x: 2, y: 1, w: 1, h: 2 },
+    
+    { x: 0, y: 3, w: 2, h: 1 },
+    { x: 2, y: 3, w: 4, h: 1 }
+  ]
+  
+  const grid2 = [
+    { x: 0, y: 0, w: 1, h: 2 },
+    { x: 1, y: 0, w: 2, h: 2 },
+    
+    { x: 3, y: 0, w: 3, h: 1 },
+    { x: 3, y: 1, w: 3, h: 2 },
+    
+    { x: 0, y: 2, w: 2, h: 1 },
+    { x: 2, y: 2, w: 1, h: 1 },
+    
+    { x: 0, y: 3, w: 4, h: 1 },
+    { x: 4, y: 3, w: 2, h: 1 }
+  ]
+  
+  const isAdjacent = (a, b) => {
+    const horiz = (a.x + a.w === b.x || b.x + b.w === a.x) &&
+      (a.y < b.y + b.h && b.y < a.y + a.h)
+    const vert = (a.y + a.h === b.y || b.y + b.h === a.y) &&
+      (a.x < b.x + b.w && b.x < a.x + a.w)
+    return horiz || vert
+  }
 
-        cellSize = cellSize + 'px'
+  const randomColorIndexes = () => {
+    const max = window.colors[0].length
+    const idxs = [...Array(max).keys()]
+    nn.shuffle(idxs)
+    return [idxs[0], idxs[1]]
+  }
 
-        const gridEle = nn.get(parentSel).content('')
-        gridEle.style.setProperty('--grid-cols', gridWidth)
-        gridEle.style.setProperty('--cell-size', cellSize)
-        gridEle.css({
-          'display': 'grid',
-          'grid-template-columns': 'repeat(var(--grid-cols), 1fr)',
-          'grid-auto-rows': 'var(--cell-size)',
-          'gap': debug ? '4px' : '0',
-          'width': '100%'
+  const pickPairIndices = (cellA, cellB, placed) => {
+    const L = window.colors[0].length
+    const all = [...Array(L).keys()]
+
+    // gather forbidden indices from neighbours
+    const forbid0 = placed
+      .filter(p => p.palette === 0 && isAdjacent(p.cell, cellA))
+      .map(p => p.index)
+    const forbid1 = placed
+      .filter(p => p.palette === 1 && isAdjacent(p.cell, cellB))
+      .map(p => p.index)
+
+    // allowed sets
+    const allow0 = all.filter(i => !forbid0.includes(i))
+    const allow1 = all.filter(i => !forbid1.includes(i))
+
+    // build all (i,j) with i≠j
+    const pairs = []
+    allow0.forEach(i => {
+      allow1.forEach(j => {
+        if (i !== j) pairs.push([i, j])
+      })
+    })
+
+    if (pairs.length > 0) {
+      return pairs[Math.floor(Math.random() * pairs.length)]
+    }
+    // fallback to totally random distinct pair
+    return randomColorIndexes()
+  }
+
+  function createGridBlock (cell, color) {
+    const leftPct   = cell.x  / totalCols * 100
+    const topPct    = cell.y  / totalRows * 100
+    const widthPct  = cell.w  / totalCols * 100
+    const heightPct = cell.h  / totalRows * 100
+
+    nn.create('div')
+      .css({
+        left:   `${leftPct}%`,
+        top:    `${topPct}%`,
+        width:  `${widthPct}%`,
+        height: `${heightPct}%`,
+        background: color
+      })
+      .addTo('.grid')
+  }
+  
+  for (let i = 0; i < grid.length; i += 2) {
+    const cellA = grid[i]
+    const cellB = grid[i + 1]
+
+    const [i1, i2] = pickPairIndices(cellA, cellB, placed)
+    const c1 = window.colors[0][i1]
+    const c2 = window.colors[1][i2]
+
+    // remember who we placed where
+    placed.push({ cell: cellA, palette: 0, index: i1 })
+    placed.push({ cell: cellB, palette: 1, index: i2 })
+
+    createGridBlock(cellA, c1)
+    createGridBlock(cellB, c2)
+  }
+  
+  
+  let currentGrid = grid
+  function animateToGrid () {
+    const newGrid = currentGrid === grid ? grid2 : grid
+    
+    const blocks = nn.getAll('.grid div')
+    const start = performance.now()
+    // capture each block’s initial %-values
+    const initial = blocks.map(block => ({
+      left:   parseFloat(block.style.left),
+      top:    parseFloat(block.style.top),
+      width:  parseFloat(block.style.width),
+      height: parseFloat(block.style.height)
+    }))
+    // compute target %-values
+    const targets = newGrid.map(cell => ({
+      left:   cell.x / totalCols * 100,
+      top:    cell.y / totalRows * 100,
+      width:  cell.w / totalCols * 100,
+      height: cell.h / totalRows * 100
+    }))
+    const duration = 800
+    const easeFn = t => nn.ease(currentEase, t)
+
+    function update (now) {
+      const elapsed = now - start
+      const t = Math.min(1, elapsed / duration)
+      const eased = easeFn(t)
+
+      blocks.forEach((block, i) => {
+        const init   = initial[i]
+        const target = targets[i]
+        // interpolate and apply
+        block.css({
+          left:   `${nn.lerp(init.left,   target.left,   eased)}%`,
+          top:    `${nn.lerp(init.top,    target.top,    eased)}%`,
+          width:  `${nn.lerp(init.width,  target.width,  eased)}%`,
+          height: `${nn.lerp(init.height, target.height, eased)}%`
         })
+      })
 
-        // multi-dimensional grid Array (to track filled cells)
-        const occupied = []
-        for (let i = 0; i < gridHeight; i++) {
-          occupied[i] = []
-          for (let j = 0; j < gridWidth; j++) {
-            occupied[i][j] = false
-          }
-        }
+      if (t < 1) {
+        requestAnimationFrame(update)
+      }
+    }
 
-        for (let row = 0; row < gridHeight; row++) {
-          for (let col = 0; col < gridWidth; col++) {
-            if (occupied[row][col]) continue
+    requestAnimationFrame(update)
+    currentGrid = newGrid
+  }
 
-            const availableColumns = gridWidth - col
-            const availableRows = gridHeight - row
-            // Maximum multiplier such that total module width (3 * multiplier) fits.
-            const maxMultiplier = Math.floor(availableColumns / 3)
-            if (maxMultiplier < 1) continue
-
-            // Create and shuffle possible multipliers (from 1 to maxMultiplier).
-            const multipliers = nn.shuffle(Array.from({ length: maxMultiplier }, (_, i) => i + 1))
-            let placed = false
-            for (const multiplier of multipliers) {
-              const moduleWidth = multiplier * 3
-              // Limit the module height to the available rows.
-              const possibleMaxHeight = Math.min(maxModuleHeight, availableRows)
-              // Create and shuffle candidate heights (from 1 to possibleMaxHeight).
-              const heights = nn.shuffle(Array.from({ length: possibleMaxHeight }, (_, i) => i + 1))
-              for (const moduleHeight of heights) {
-                // Check if the rectangle for the module is free.
-                let canPlace = true
-                for (let r = row; r < row + moduleHeight; r++) {
-                  for (let c = col; c < col + moduleWidth; c++) {
-                    if (occupied[r][c]) {
-                      canPlace = false
-                      break
-                    }
-                  }
-                  if (!canPlace) break
-                }
-                if (!canPlace) continue
-
-                // Mark cells as occupied.
-                for (let r = row; r < row + moduleHeight; r++) {
-                  for (let c = col; c < col + moduleWidth; c++) {
-                    occupied[r][c] = true
-                  }
-                }
-
-                // Create the module element and set its grid placement.
-                const moduleEl = nn.create('div')
-                  .css({
-                    'display': 'flex',
-                    'overflow': 'hidden',
-                    'background': '#f0f0f0',
-                    'border': debug ? '1px solid #ccc' : 'none',
-                    'grid-column': (col + 1) + ' / span ' + moduleWidth,
-                    'grid-row': (row + 1) + ' / span ' + moduleHeight
-                  })
-
-                const cellCSS = {
-                  'display': 'flex',
-                  'align-items': 'center',
-                  'justify-content': 'center',
-                  'border-right': debug ? '1px solid #ccc' : 'none'
-                }
-
-                const cell1 = nn.create('div').css(cellCSS)
-                const cell2 = nn.create('div').css(cellCSS)
-
-                if (!debug) {
-                  cell1.style.background = nn.random(colors[0])
-                  cell2.style.background = nn.random(colors[2])
-                } else {
-                  cell1.style.background = '#939598'
-                  cell2.style.background = '#c7c8ca'
-                }
-
-
-                // Randomly determine which cell is double-width.
-                // The smaller part should be 'multiplier' and the larger '2 * multiplier'
-                if (Math.random() < 0.5) {
-                  cell1.style.flex = multiplier + ''
-                  cell2.style.flex = (2 * multiplier) + ''
-                } else {
-                  cell1.style.flex = (2 * multiplier) + ''
-                  cell2.style.flex = multiplier + ''
-                }
-                moduleEl.appendChild(cell1)
-                moduleEl.appendChild(cell2)
-                gridEle.appendChild(moduleEl)
-                placed = true
-                break
-              }
-              if (placed) break
-            }
-          }
-        }
-      };
-
-      generateGrid(settings)
-
-    </script>
-  </body>
-</html>
+  nn.get('.grid').on('click', () => animateToGrid())
+</script>
