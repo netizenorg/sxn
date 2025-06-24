@@ -85,8 +85,8 @@
       gui.add(settings, 'reset').name('RESET TO DEFAULT (+new colors)')
       gui.add(settings, 'randomize').name('RANDO (customized random)')
       gui.add(settings, 'image', images).onChange(() => {
-        clean.set('src', `../images/dream/${settings.image}.jpg`)
-        syrup.updateImage(`../images/dream/${settings.image}.jpg`)
+        clean.set('src', `images/dream/${settings.image}.jpg`)
+        syrup.updateImage(`images/dream/${settings.image}.jpg`)
       })
       // gui.add(settings, 'transition', 0, 1, 0.01).name('hover transition speed').onChange(() => {
       //   nn.get('.grid > div > img').css({ transition: `opacity ${settings.transition}s`})
@@ -181,7 +181,7 @@
       })
 
       const syrup = new NetizenSyrupImage({
-        image: '../images/dream/becca.jpg',
+        image: 'images/dream/becca.jpg',
         parent: '.grid div:nth-child(1)',
         second: '.grid div:nth-child(2)',
         huffhack: huffhack,
@@ -191,7 +191,7 @@
       })
 
       const clean = nn.create('img')
-        .set('src', '../images/dream/becca.jpg')
+        .set('src', 'images/dream/becca.jpg')
         .set('name', 'clean')
         .addTo('.grid div:nth-child(1)')
 
