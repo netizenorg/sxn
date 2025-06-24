@@ -136,7 +136,7 @@ function main () {
     yOverlap: 80
   })
 
-  const randomImage = `../images/dream/${nn.random(images)}.jpg`
+  const randomImage = `images/dream/${nn.random(images)}.jpg`
   syrup = new NetizenSyrupImage({
     image: randomImage,
     parent: '.grid div:nth-child(4)',
