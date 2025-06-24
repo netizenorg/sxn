@@ -8,15 +8,9 @@ window.colors = [
 let splash, grid, bent, syrup, clean
 const images = ['becca', 'brannon', 'harlo', 'ingrid', 'janice', 'margaret', 'melody', 'tara']
 
-function randomize () {
-
-
-  syrup.update()
-}
-
 function updateSyrup () {
   // pick new image
-  const image = `../images/dream/${nn.random(images)}.jpg`
+  const image = `images/dream/${nn.random(images)}.jpg`
 
   // randomize settings
   let order = [2, 3, 4]
@@ -87,10 +81,10 @@ function main () {
   splash = new NetizenASCIISplash({
     ele: '#splash-canvas',
     images: [
-      '../images/walking-tour/netwalkingtour4.jpg',
-      '../images/walking-tour/netwalkingtour3.jpg',
-      '../images/walking-tour/netwalkingtour2.jpg',
-      '../images/walking-tour/netwalkingtour1.jpg'
+      'images/walking-tour/netwalkingtour4.jpg',
+      'images/walking-tour/netwalkingtour3.jpg',
+      'images/walking-tour/netwalkingtour2.jpg',
+      'images/walking-tour/netwalkingtour1.jpg'
     ],
     holdTime: 6000,
     fadeTime: 1000,
