@@ -43,6 +43,7 @@
 
       const settings = {
         reset: () => window.location.reload(),
+        newColors: () => { grid.updateColors(); syrup.update() },
         randomize: () => randomize(),
         image: 'becca',
         transition: 0.5
@@ -83,6 +84,7 @@
 
       const gui = new dat.GUI()
       gui.add(settings, 'reset').name('RESET TO DEFAULT (+new colors)')
+      gui.add(settings, 'newColors').name('NEW COLOR SCHEME')
       gui.add(settings, 'randomize').name('RANDO (customized random)')
       gui.add(settings, 'image', images).onChange(() => {
         clean.set('src', `images/dream/${settings.image}.jpg`)

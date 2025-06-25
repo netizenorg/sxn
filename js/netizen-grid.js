@@ -139,6 +139,32 @@ class NetizenGrid {
     window.requestAnimationFrame(update)
     this.currentGrid = newGrid
   }
+
+  updateColors () {
+    this.placed = []
+    const grid = this.currentGrid
+    // grab each block div instead of the container
+    const blocks = nn.getAll(`${this.ele} > div`)
+    let idx = 0
+
+    for (let i = 0; i < grid.length; i += 2) {
+      const cellA = grid[i]
+      const cellB = grid[i + 1]
+      const [i1, i2] = this.pickPairIndices(cellA, cellB, this.placed)
+      const c1 = window.colors[0][i1]
+      const c2 = window.colors[1][i2]
+
+      this.placed.push({ cell: cellA, palette: 0, index: i1 })
+      this.placed.push({ cell: cellB, palette: 1, index: i2 })
+
+      const blockA = blocks[idx]
+      const blockB = blocks[idx + 1]
+      blockA.css({ backgroundColor: c1 })
+      blockB.css({ backgroundColor: c2 })
+
+      idx += 2
+    }
+  }
 }
 
 window.NetizenGrid = NetizenGrid
