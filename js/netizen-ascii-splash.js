@@ -34,6 +34,10 @@ class NetizenASCIISplash {
     })
     this.ctx = this.canvas.getContext('2d')
 
+    const altTxt = 'A Slide show of netizen.org initiatives, the ASCII symbols "*", "." and "O" print across the screen to transition various images of events and projects from netizen\'s history'
+    this.canvas.setAttribute('aria-label', altTxt)
+    this.canvas.textContent = altTxt
+
     this.init()
     this.initCanvasSize()
 
