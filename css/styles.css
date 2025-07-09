@@ -1,11 +1,12 @@
 :root {
   --prim-a: #fff;
   --prim-b: #000;
-  --hs: 4.4em; /* height size */
+  --blue: #0000ff;
+  --hs: 7.5em; /* header height size */
   --r: 5vw; /* radius for borders */
 
   /* word‐spacing: 20px → 1.25rem (assuming 16px base) */
-  --ws: 1.25rem
+  /* --ws: 0.25rem; */
 
   /* font sizes */
   --fs-title: 2.5rem;    /* 40px */
@@ -18,14 +19,20 @@
   --lh-heading: 1.625rem; /* 26px */
 
   --fs-body-web: 1.3125rem; /* 21px */
-  --lh-body-web: 1.2;       /* 120% */
+  --lh-body-web: 1.575rem;    /* 120% */
+  --ws-body-web: 0.25rem;
 
   --fs-body-print: 0.8125rem; /* 13px */
   --lh-body-print: 1.125rem;  /* 18px */
 
   /* tertiary fluid size between 12–17px */
   --fs-tertiary: clamp(0.75rem, 1vw, 1.0625rem);
-  --lh-tertiary: 1.2;
+  --lh-tertiary: calc(clamp(0.75rem, 1vw, 1.0625rem) * 1.2);
+
+  /* NOTE: assuming ascii-splash is set to 16:9 */
+  --splash-height: calc(100vw * 9/16 - var(--hs));
+
+  --out-cubic: cubic-bezier(0.215,0.61,0.355,1);
 }
 
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
@@ -36,7 +43,18 @@
   box-sizing: border-box;
 }
 
-html, body {
+::selection {
+  background: var(--blue);
+  color: var(--prim-a);
+}
+
+/* firefox */
+::-moz-selection {
+  background: var(--blue);
+  color: var(--prim-a);
+}
+
+body {
   margin: 0;
   background: var(--prim-a);
 
@@ -51,35 +69,55 @@ html, body {
 h1 {
   font-size: var(--fs-title);
   line-height: var(--lh-title);
-  word-spacing: var(--ws);
+  /* word-spacing: var(--ws); */
 }
 
 /* Subtitle (e.g. second-level headings) */
 h2 {
   font-size: var(--fs-subtitle);
   line-height: var(--lh-subtitle);
-  word-spacing: var(--ws);
+  /* word-spacing: var(--ws); */
 }
 
 /* Section headings (e.g. third-level) */
 h3 {
   font-size: var(--fs-heading);
   line-height: var(--lh-heading);
-  word-spacing: var(--ws);
+  /* word-spacing: var(--ws); */
 }
 
 /* Body text on screen */
-p {
+span, p {
   font-size: var(--fs-body-web);
   line-height: var(--lh-body-web);
-  word-spacing: var(--ws);
+  word-spacing: var(--ws-body-web);
 }
 
 /* Tertiary text (e.g. captions, footnotes) */
 small {
   font-size: var(--fs-tertiary);
   line-height: var(--lh-tertiary);
-  word-spacing: var(--ws);
+  /* word-spacing: var(--ws); */
+}
+
+a {
+  color: var(--blue);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+blockquote {
+  font-style: italic;
+  margin: 0 0 0 1rem;
+}
+
+blockquote:before {
+  content: "❝";
+  margin-left: -1rem;
+  padding-right: 0.5rem;
+  font-size: 2rem;
 }
 
 /* Body text for print */
@@ -87,19 +125,81 @@ small {
   p {
     font-size: var(--fs-body-print);
     line-height: var(--lh-body-print);
-    word-spacing: var(--ws);
+    /* word-spacing: var(--ws); */
   }
 }
 
-/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
-/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
+.prim-nav,
+.sec-nav {
+  cursor: pointer;
+  border-radius: 2em;
+  padding: 0.25em 1.3em 0.35em 1.3em;
+  border: 1px solid transparent;
+  margin: 0 1em;
+  user-select: none;
+}
+
+.prim-nav {
+  border: 1px solid var(--prim-a);
+  background-color: var(--prim-a);
+  color: var(--prim-b);
+}
+
+.prim-nav:hover,
+.prim-nav.selected {
+  border: 1px solid var(--prim-b);
+  background-color: var(--prim-b);
+  color: var(--prim-a);
+}
+
+.sec-nav {
+  border: 1px solid var(--prim-b);
+  background-color: var(--prim-b);
+  color: var(--prim-a);
+}
+
+.sec-nav:hover,
+.sec-nav.selected {
+  border: 1px solid var(--prim-b);
+  background-color: var(--prim-a);
+  color: var(--prim-b);
+}
+
+.cap {
+  text-transform: capitalize;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                       logo + header + menu                          *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
+#loader {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: var(--prim-b);
+  opacity: 1;
+  transition: opacity 0.8s var(--out-cubic);
+}
 
 #netizen-logo {
   position: fixed;
-  top: 30px;
-  left: 50px;
-  z-index: 100;
-  width: 164px;
+  top: 20px;
+  left: 23px;
+  z-index: 110;
+  width: 139px;
+  cursor: pointer;
 }
 
 header {
@@ -116,6 +216,8 @@ header {
 
   height: var(--hs);
   max-height: 120px;
+
+  transition: background 1s var(--out-cubic);
 }
 
 @media (max-width: 600px) {
@@ -135,23 +237,13 @@ header {
   }
 }
 
-header nav span {
+/* header nav span {
   cursor: pointer;
   border-radius: 2em;
   padding: 0.25em 1.3em 0.35em 1.3em;
   border: 1px solid transparent;
   margin: 0 1em;
-  /* font-weight: bold; */
-  border: 1px solid var(--prim-b);
-  background-color: var(--prim-b);
-  color: var(--prim-a);
-}
-
-header nav span:hover {
-  border: 1px solid var(--prim-b);
-  background-color: var(--prim-a);
-  color: var(--prim-b);
-}
+} */
 
 header .burger {
   position: fixed;
@@ -166,19 +258,193 @@ header .burger {
   }
 }
 
-/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
-/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
 #splash-canvas {
+  position: fixed;
   display: block;
-  /* width: 100vw; */
   height: auto;
-  /* fallback if you later want CSS-only aspect-ratio:
-     aspect-ratio: var(--aspect-width,16) / var(--aspect-height,9);
-  */
+  transition: opacity 1s var(--out-cubic);
 }
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                    content (case studies) elements                  *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
+#content {
+  position: relative;
+  top: var(--hs);
+  left: 100vw;
+
+  width: 100vw;
+  height: var(--splash-height);
+  transition: all 0.8s var(--out-cubic);
+
+  background: var(--prim-b);
+}
+
+#content > div {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: calc(100% / 3);
+  min-height: 100%;
+  height: auto;
+  color: var(--prim-a);
+  padding: var(--lh-title);
+}
+
+#content > div > .cell-content {
+  opacity: 0;
+  transition: opacity 0.4s var(--out-cubic);
+}
+
+#content > div > .cell-content.visible {
+  opacity: 1;
+}
+
+#content > div > .cell-content > .content-copy {
+  max-width: 42rem;
+}
+
+#content > div > .cell-content > .content-copy > small {
+  display: inline-block;
+  margin-top: 100px;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*                                              initiatives navigation/menu  */
+
+#content > div.sub-nav {
+  padding-right: 0px;
+  /* background-color: var(--blue) !important; */
+  background-color: var(--prim-b) !important;
+}
+
+#content > div.sub-nav > .sub-nav-item {
+  opacity: 0;
+  color: var(--prim-a);
+  display: block;
+
+  padding: 0.2em 0 0.2em 0.7em;
+  border-radius: 2em 0 0 2em;
+
+  transition: opacity 0.4s var(--out-cubic);
+}
+
+#content > div.sub-nav > .sub-nav-item:hover {
+  background: var(--prim-a);
+  color: var(--prim-b);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#content > div.sub-nav > .sub-nav-item.selected {
+  background: var(--prim-a);
+  color: var(--prim-b);
+  font-weight: 600;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*                                                    initatives case-study  */
+
+#content .case-study > div:nth-child(1) {
+  max-width: 42rem;
+}
+
+#content .case-study > div:nth-child(2) {
+  margin-top: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+#content .case-study h2 {
+  margin: 0 0 1rem 0;
+}
+
+#content .case-study .bold-blue {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+#content .case-study p {
+  margin: 1rem 0;
+}
+
+.case-study-thumb-title {
+  position: absolute;
+  z-index: 10;
+  padding: var(--lh-title);
+  margin: 0;
+}
+
+.case-study-thumb-title:hover {
+  color: var(--prim-a);
+  background: var(--prim-b);
+  cursor: pointer;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*                                               case-study detail (pop up)  */
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.case-study-detail {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 200;
+
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+
+  padding: var(--lh-title);
+  opacity: 0;
+  transition: opacity 0.8s var(--out-cubic);
+}
+
+.case-study-detail img {
+  width: 100%;
+}
+
+.case-study-detail .title-bar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.case-study-detail .close {
+  cursor: pointer;
+  font-size: 4.3rem;
+}
+
+.case-study-detail .info-bar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.case-study-detail .content {
+  max-width: 42rem;
+  margin-top: 4rem;
+}
+
+.case-study-detail .content p {
+  margin: 0 0 1rem 0;
+}
+
+.case-study-detail .bold {
+  font-weight: 600;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                               the grid                              *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
 
 .grid {
   position: relative;
+  top: var(--hs);
   width: 100vw;
   height: calc(100vw * 0.75);
   background: var(--prim-b);
@@ -189,7 +455,8 @@ header .burger {
   overflow: hidden;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat
+  background-repeat: no-repeat;
+  transition: all 0.7s var(--out-cubic);
 }
 
 .grid > div > img {
@@ -199,7 +466,7 @@ header .burger {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: opacity 0.5s;
+  transition: opacity 0.8s var(--out-cubic);
   cursor: pointer;
 }
 
@@ -211,12 +478,189 @@ header .burger {
   opacity: 1
 }
 
-/* /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ */
-/* \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                                bend panel                           *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
+.bend-panel {
+  display: none; /* hide to start */
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s var(--out-cubic);
+}
+
+.bend-panel .options {
+  /* height: 25%; */
+  background: var(--prim-a);
+  padding: 1rem;
+}
+
+.bend-panel .options .row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.bend-panel .options button {
+  margin-left: 0 !important;
+}
+
+.bend-panel .options .label {
+  margin: 0 1rem;
+}
+
+.bend-panel #editor {
+  /* height: 75%; */
+}
+
+#cm-complete-0 {
+  z-index: 201;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  cursor: pointer;
+}
+
+/* hide the real checkbox */
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* the “track” */
+.toggle-switch .slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ccc;
+  border-radius: 14px;
+  transition: background 0.2s;
+}
+
+/* the “knob” */
+.toggle-switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+/* checked state */
+.toggle-switch input:checked + .slider {
+  background: var(--blue);
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+/* reset */
+.bend-panel input[type="range"] {
+  -webkit-appearance: none;
+  /* width: 100%; */
+  background: transparent;
+  cursor: pointer;
+}
+.bend-panel input[type="range"]:focus {
+  outline: none;
+}
+
+/* WebKit track & thumb */
+.bend-panel input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #ccc;
+  border-radius: 3px;
+}
+.bend-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--blue);
+  border-radius: 50%;
+  margin-top: -5px; /* vertically center thumb */
+  transition: background 0.2s, transform 0.2s;
+}
+.bend-panel input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* Firefox track & thumb */
+.bend-panel input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #ccc;
+  border-radius: 3px;
+}
+.bend-panel input[type="range"]::-moz-range-progress {
+  height: 6px;
+  background: var(--blue);
+  border-radius: 3px;
+}
+.bend-panel input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--blue);
+  border: none;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.2s;
+}
+.bend-panel input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* IE/Edge */
+.bend-panel input[type="range"]::-ms-track {
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.bend-panel input[type="range"]::-ms-fill-lower {
+  background: #ccc;
+  border-radius: 3px;
+}
+.bend-panel input[type="range"]::-ms-fill-upper {
+  background: #ccc;
+  border-radius: 3px;
+}
+.bend-panel input[type="range"]::-ms-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--blue);
+  border-radius: 50%;
+  margin-top: 0; /* Edge centers thumb automatically */
+  transition: background 0.2s, transform 0.2s;
+}
+.bend-panel input[type="range"]::-ms-thumb:hover {
+  transform: scale(1.1);
+}
+.bend-panel input[type="range"]:focus::-ms-fill-lower,
+.bend-panel input[type="range"]:focus::-ms-fill-upper {
+  background: var(--blue);
+}
+
+
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                                  footer                             *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
 
 footer {
-  /* position: absolute;
-  bottom: 0px; */
+  position: relative;
+  top: var(--hs);
 
   width: 100vw;
   padding: 1em 2em;

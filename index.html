@@ -16,41 +16,60 @@
     <meta property="og:site_name" content="netizen.org">
     <meta name="twitter:site" content="@netizenorg">
 
-    <!-- <link rel="icon" type="image/png" href="images/n.png"> -->
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
 
-    <img id="netizen-logo" src="images/logo.svg" alt="netizen.org logo">
+    <section id="loader">
+      <img src="images/logo-inverted-animated.svg" alt="netizen.org logo animated for the load screen">
+    </section>
+
+    <img id="netizen-logo" src="images/logo.svg" alt="netizen.org logo" tabindex=0 role="button" aria-label="Go to home">
 
     <header>
       <div class="burger">
         =
       </div>
       <nav>
-        <span id="about-link">About</span>
-        <span id="init-link">Initiatives</span>
-        <span>Support</span>
+        <span name="about" class="sec-nav">About</span>
+        <span name="initiatives" class="sec-nav">Initiatives</span>
+        <span name="support" class="sec-nav">Support</span>
       </nav>
     </header>
 
-    <canvas id="splash-canvas"></canvas>
+    <main>
+      <div id="splash-canvas"></div>
 
-    <div class="grid"></div>
+      <div id="content"></div>
 
-    <footer>
-      <div>
-        <div class="wordmark">netizen.org</div>
-        <div class="slogan">bent on bending tech</div>
-      </div>
-    </footer>
+      <div id="main-grid" class="grid"></div>
+
+      <footer>
+        <div>
+          <div class="wordmark">netizen.org</div>
+          <div class="slogan">bent on bending tech</div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="https://404.jodi.org" target="_blank">
+            <img src="images/w.gif" alt="jodi.org 404 bunny">
+          </a>
+        </div>
+      </footer>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+    <script src="js/netitor.min.js"></script>
+    <script src="js/netizen-nav.js"></script>
     <script src="js/netizen-ascii-splash.js"></script>
+    <script src="js/netizen-content-block.js"></script>
     <script src="js/netizen-grid.js"></script>
+    <script src="js/netizen-bend-panel.js"></script>
     <script src="js/netizen-syrup-image.js"></script>
     <script src="js/netizen-bent-text.js"></script>
+    <script src="js/load-case-study.js"></script>
+    <script src="js/grids.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

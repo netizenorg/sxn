@@ -1,11 +1,140 @@
 /* global nn */
-class SeededRandom {
-  constructor (seed) {
-    // store your seed (e.g. 100–200)
-    this._seed = seed || 0
-    // initialize the mulberry32 state function
+/*
+
+  // convert an image into netizen.org's "syrup" digitized layers
+
+  const syrup = new NetizenSyrupImage({
+    image: 'images/dream/becca.jpg',    // path to image
+    ele: nn.get('div')                  // parent element
+  })
+
+  // with additional optional parameters
+
+  const syrup = new NetizenSyrupImage({
+    image: randomImage,
+    ele: grid.getBlock(4),
+    colors: [
+      grid.getBlock(4).style.backgroundColor,
+      grid.getBlock(3).style.backgroundColor
+    ],
+    huffhack: {
+      process: false,
+      opacity: 0.66,
+      zIndex: 3,
+      seed: 7
+    },
+    dither: {
+      process: true,
+      opacity: 0.67,
+      zIndex: 2,
+      algorithm: 'atkinson',
+      dotSize: 1,
+      threshold: 174
+    },
+    pixelate: {
+      process: true,
+      opacity: 1,
+      zIndex: 1,
+      size: 8,
+      threshold: 128
+    },
+    ascii: {
+      process: true,
+      opacity: 0.5,
+      zIndex: 4,
+      chars: 'O*',
+      fontSize: 8,
+      fgColor: 'white'
+    }
+  })
+
+  // properties
+
+  pixelate.process = true
+  pixelate.opacity = nn.random(0.5, 1)
+  pixelate.zIndex = 1
+  pixelate.size = nn.random(6, 28)
+  pixelate.threshold = nn.random(16, 128)
+
+  huffhack.process = nn.random() > 0.5 ? true : false
+  huffhack.opacity = nn.random(0, 0.5)
+  huffhack.zIndex = order[0]
+  huffhack.seed = nn.random(gvals)
+
+  dither.process = nn.random() > 0.5 ? true : false
+  dither.opacity = nn.random()
+  dither.zIndex = order[1]
+  dither.algorithm = 'bayer'
+  dither.dotSize = nn.random([1, 3, 5])
+  dither.threshold = 174 // doesn't matter for bayer (only other algos)
+
+  ascii.process = nn.random() > 0.5 ? true : false
+  ascii.opacity = nn.random()
+  ascii.zIndex = order[2]
+  ascii.chars = nn.random(['O*.   ', 'O*.  ', 'O*. ', 'O*. '])
+  ascii.fontSize = nn.random(4, 12)
+  ascii.fgColor = nn.random(['black', 'white'])
+
+  // public methods
+
+  syrup.upate() // run after chaning properties
+
+  syrup.update({
+    image: img,                       // instance of image
+    colors: [ '#fffff', '#00000']     // fg/bg colors
+  })
+
+  syrup.updateColors([ '#fffff', '#00000'])
+
+  syrup.updateImage('path/to/newImage')
+
+*/
+
+class NetizenSyrupImage {
+  constructor (opts = {}) {
+    this.image = opts.image
+    this.ele = opts.ele
+
+    this.colors = [nn.randomColor(), nn.randomColor()]
+    if (opts.colors) this.updateColors(opts.colors)
+
+    // syrup layers properties
+    this.huffhack = opts.huffhack || { process: true, zIndex: 1, opacity: 0.5 }
+    this.pixelate = opts.pixelate || { process: true, zIndex: 2, opacity: 0.5 }
+    this.dither = opts.dither || { process: true, zIndex: 3, opacity: 0.5 }
+    this.ascii = opts.ascii || { process: true, zIndex: 4, opacity: 0.5 }
+
+    // seeded random properties
+    this._seed = this.huffhack.seed || 0
     this._rand = this._mulberry32(this._seed)
+
+    this.loadAndResizeImage(this.image, this.ele, (img) => {
+      this._image = img
+      this.update(img)
+    })
   }
+
+  loadAndResizeImage (url, container, callback) {
+    const img = new window.Image()
+    img.addEventListener('load', () => {
+      const cw = container.clientWidth
+      const ch = container.clientHeight
+      const { naturalWidth: nw, naturalHeight: nh } = img
+      // use the larger scale so no letterboxing (cover behavior)
+      const scale = Math.max(cw / nw, ch / nh)
+      img.width = nw * scale
+      img.height = nh * scale
+      callback(img)
+    })
+    img.addEventListener('error', err => {
+      console.error('Failed to load image', err)
+    })
+    img.src = url
+  }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                       seeded random logix                           *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   // mulberry32 generator factory
   _mulberry32 (a) {
@@ -34,45 +163,10 @@ class SeededRandom {
     this._seed = seed
     this._rand = this._mulberry32(this._seed)
   }
-}
 
-class NetizenSyrupImage {
-  constructor (opts = {}) {
-    this.canvas = opts.canvas
-    this.image = opts.image
-    this.parent = opts.parent
-    this.second = opts.second
-
-    this.huffhack = opts.huffhack || { process: true, zIndex: 1, opacity: 0.5 }
-    this.pixelate = opts.pixelate || { process: true, zIndex: 2, opacity: 0.5 }
-    this.dither = opts.dither || { process: true, zIndex: 3, opacity: 0.5 }
-    this.ascii = opts.ascii || { process: true, zIndex: 4, opacity: 0.5 }
-
-    this.SR = new SeededRandom(this.huffhack.seed)
-
-    this.loadAndResizeImage(this.image, nn.get(this.parent), (img) => {
-      this._image = img
-      this.update(img)
-    })
-  }
-
-  loadAndResizeImage (url, container, callback) {
-    const img = new window.Image()
-    img.addEventListener('load', () => {
-      const cw = container.clientWidth
-      const ch = container.clientHeight
-      const { naturalWidth: nw, naturalHeight: nh } = img
-      // use the larger scale so no letterboxing (cover behavior)
-      const scale = Math.max(cw / nw, ch / nh)
-      img.width = nw * scale
-      img.height = nh * scale
-      callback(img)
-    })
-    img.addEventListener('error', err => {
-      console.error('Failed to load image', err)
-    })
-    img.src = url
-  }
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                       huffhack / glitch layer                       *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   glitchIt (base64) {
     const jpg = 'data:image/jpeg;base64,'
@@ -89,9 +183,9 @@ class NetizenSyrupImage {
         const idx = i + 24 // few bytes into the huffman codes
         const huf = (bytes[i + 21] === 0) ? 'DC' : 'AC'
         const len = (huf === 'DC') ? 16 : 255
-        let ran = Math.floor(this.SR.random(0, len))
-        if (ran === bytes[idx]) ran = Math.floor(this.SR.random(0, len))
-        if (ran === bytes[idx]) ran = Math.floor(this.SR.random(0, len))
+        let ran = Math.floor(this.random(0, len))
+        if (ran === bytes[idx]) ran = Math.floor(this.random(0, len))
+        if (ran === bytes[idx]) ran = Math.floor(this.random(0, len))
         bytes[idx] = ran
         break
       }
@@ -116,7 +210,7 @@ class NetizenSyrupImage {
     const ctx = canvas.getContext('2d')
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     const data = canvas.toDataURL('image/jpeg')
-    if (this.huffhack.seed) this.SR.updateSeed(this.huffhack.seed)
+    if (this.huffhack.seed) this.updateSeed(this.huffhack.seed)
     const bytes = this.glitchIt(data)
     const b64 = window.btoa(this.Uint8ToString(bytes))
     let url = `data:image/jpeg;base64,${b64}`
@@ -128,8 +222,8 @@ class NetizenSyrupImage {
       ctx.drawImage(img, 0, 0)
       url = canvas.toDataURL('image/jpeg')
 
-      const imgEle = (document.querySelector(`${this.parent} img[name="huffhack"]`))
-        ? nn.get(`${this.parent} img[name="huffhack"]`) : nn.create('img')
+      const imgEle = (this.ele.querySelector('img[name="huffhack"]'))
+        ? this.ele.querySelector('img[name="huffhack"]') : nn.create('img')
       const css = {
         zIndex: this.huffhack.zIndex || 1,
         opacity: typeof this.huffhack.opacity === 'number' ? this.huffhack.opacity : 0.5,
@@ -139,12 +233,15 @@ class NetizenSyrupImage {
         .css(css)
         .set('src', url)
         .set('name', 'huffhack')
-        .addTo(this.parent)
+        .addTo(this.ele)
     }
     img.src = url
   }
 
-  // in StandardJS style — no parseColor helper needed
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                   duotone pixelated layer                           *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
   async makePixelatedDuotone (img, opts) {
     const {
       size = 8,
@@ -153,19 +250,15 @@ class NetizenSyrupImage {
     const w = img.width
     const h = img.height
 
-    // 1) pull your two tones via nn.colorMatch
-    const parentEl = nn.get(this.parent)
-    const lowMatch = nn.colorMatch(parentEl.style.backgroundColor)
-    const lr = parseInt(lowMatch[2], 10)
-    const lg = parseInt(lowMatch[3], 10)
-    const lb = parseInt(lowMatch[4], 10)
+    const c1 = nn.hex2rgb(this.colors[0])
+    const lr = c1.r
+    const lg = c1.g
+    const lb = c1.b
 
-    // assumes this.second is a DOM element with a background-color set
-    const secEl = nn.get(this.second)
-    const highMatch = nn.colorMatch(secEl.style.backgroundColor)
-    const hr = parseInt(highMatch[2], 10)
-    const hg = parseInt(highMatch[3], 10)
-    const hb = parseInt(highMatch[4], 10)
+    const c2 = nn.hex2rgb(this.colors[1])
+    const hr = c2.r
+    const hg = c2.g
+    const hb = c2.b
 
     // 2) draw a small, pixelated version
     const smallW = Math.ceil(w / size)
@@ -209,8 +302,8 @@ class NetizenSyrupImage {
     octx.drawImage(smallCanvas, 0, 0, w, h)
 
     // 5) insert back into the DOM
-    const imgEle = (document.querySelector(`${this.parent} img[name="pixelate"]`))
-      ? nn.get(`${this.parent} img[name="pixelate"]`) : nn.create('img')
+    const imgEle = (this.ele.querySelector('img[name="pixelate"]'))
+      ? this.ele.querySelector('img[name="pixelate"]') : nn.create('img')
     const url = outCanvas.toDataURL()
     const css = {
       zIndex: this.pixelate.zIndex || 2,
@@ -221,8 +314,12 @@ class NetizenSyrupImage {
       .css(css)
       .set('src', url)
       .set('name', 'pixelate')
-      .addTo(parentEl)
+      .addTo(this.ele)
   }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                           dither layer                              *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   makeDitheredImage (img, opts = {}) {
     const {
@@ -306,15 +403,15 @@ class NetizenSyrupImage {
       }
     }
 
-    // parse fg/bg from elements
-    const fgCss = nn.get(this.parent).style.backgroundColor
-    const bgCss = nn.get(this.second).style.backgroundColor
-    const mkRGB = css => {
-      const m = nn.colorMatch(css)
-      return [parseInt(m[2], 10), parseInt(m[3], 10), parseInt(m[4], 10)]
-    }
-    const [fgR, fgG, fgB] = mkRGB(fgCss)
-    const [bgR, bgG, bgB] = mkRGB(bgCss)
+    const c1 = nn.hex2rgb(this.colors[0])
+    const fgR = c1.r
+    const fgG = c1.g
+    const fgB = c1.b
+
+    const c2 = nn.hex2rgb(this.colors[1])
+    const bgR = c2.r
+    const bgG = c2.g
+    const bgB = c2.b
 
     if (dotSize > 1) {
       // halftone‐style dots
@@ -356,9 +453,8 @@ class NetizenSyrupImage {
     }
 
     const url = canvas.toDataURL('image/png')
-    const selector = `${this.parent} img[name="dither"]`
-    const imgEle = document.querySelector(selector)
-      ? nn.get(selector) : nn.create('img')
+    const imgEle = this.ele.querySelector('img[name="dither"]')
+      ? this.ele.querySelector('img[name="dither"]') : nn.create('img')
     const css = {
       zIndex: this.dither.zIndex || 3,
       opacity: typeof this.dither.opacity === 'number'
@@ -369,8 +465,12 @@ class NetizenSyrupImage {
       .css(css)
       .set('name', 'dither')
       .set('src', url)
-      .addTo(this.parent)
+      .addTo(this.ele)
   }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                           ASCII layer                               *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   makeAsciiImage (img, opts = {}) {
     // store for reuse in css
@@ -423,9 +523,8 @@ class NetizenSyrupImage {
 
     // export as image and append
     const url = canvas.toDataURL('image/png')
-    const selector = `${this.parent} img[name="ascii"]`
-    const imgEle = document.querySelector(selector)
-      ? nn.get(selector)
+    const imgEle = this.ele.querySelector('img[name="ascii"]')
+      ? this.ele.querySelector('img[name="ascii"]')
       : nn.create('img')
     const css = {
       zIndex: this.ascii.zIndex || 4,
@@ -439,43 +538,61 @@ class NetizenSyrupImage {
       .css(css)
       .set('name', 'ascii')
       .set('src', url)
-      .addTo(this.parent)
+      .addTo(this.ele)
   }
 
-  updateInit (opts) {
-    this.parent = opts.parent
-    this.second = opts.second
-    this.updateImage(opts.image)
-  }
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                         public methods                              *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   updateImage (image) {
     this.image = image // image path
-    this.loadAndResizeImage(image, nn.get(this.parent), (img) => {
+    this.loadAndResizeImage(image, this.ele, (img) => {
       this._image = img // image data
       this.update(img)
     })
   }
 
-  update (image) {
-    if (!image) image = this._image
+  updateColors (arr) {
+    if (!this.colors) this.colors = []
 
-    const pEle = document.querySelector(`${this.parent} img[name="pixelate"]`)
+    for (let i = 0; i < 2; i++) {
+      const c = arr[i]
+      const m = nn.colorMatch(c)
+      if (m[0] === 'rgb') {
+        const r = parseInt(m[2])
+        const g = parseInt(m[3])
+        const b = parseInt(m[4])
+        this.colors[i] = nn.rgb2hex(r, g, b)
+      } else if (m[0] === 'hex') {
+        this.colors[i] = m[1]
+      } else {
+        console.error('updateColors: unrecognized color format')
+      }
+    }
+  }
+
+  update (opts = {}) {
+    const image = opts.image || this._image
+
+    if (opts.colors) this.updateColors(opts.colors)
+
+    const pEle = this.ele.querySelector('img[name="pixelate"]')
     if (this.pixelate.process) this.makePixelatedDuotone(image, this.pixelate)
     else if (pEle) pEle.css('display', 'none')
 
-    const hEle = document.querySelector(`${this.parent} img[name="huffhack"]`)
+    const hEle = this.ele.querySelector('img[name="huffhack"]')
     if (this.huffhack.process) this.huffHack(image)
     else if (hEle) hEle.css('display', 'none')
 
-    const dEle = document.querySelector(`${this.parent} img[name="dither"]`)
+    const dEle = this.ele.querySelector('img[name="dither"]')
     if (this.dither.process) this.makeDitheredImage(image, this.dither)
     else if (dEle) dEle.css('display', 'none')
 
-    const aEle = document.querySelector(`${this.parent} img[name="ascii"]`)
+    const aEle = this.ele.querySelector('img[name="ascii"]')
     if (this.ascii.process) this.makeAsciiImage(image, this.ascii)
     else if (aEle) aEle.css('display', 'none')
   }
 }
 
 window.NetizenSyrupImage = NetizenSyrupImage
-window.SeededRandom = SeededRandom

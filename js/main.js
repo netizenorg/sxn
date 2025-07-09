@@ -1,170 +1,342 @@
-/* global nn, NetizenGrid, NetizenASCIISplash, NetizenSyrupImage, NetizenBentText */
+/* global nn, NetizenNav, NetizenGrid, NetizenASCIISplash, NetizenContentBlock, NetizenBendPanel, NetizenSyrupImage */
 
 window.colors = [
   ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
   ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
 ]
 
-let splash, grid, bent, syrup, clean
-const images = ['becca', 'brannon', 'harlo', 'ingrid', 'janice', 'margaret', 'melody', 'tara']
+window.data = null // contains all the content data
+let nav, splash, content, grid, bendPanel
 
-function updateSyrup () {
-  // pick new image
-  const image = `images/dream/${nn.random(images)}.jpg`
-
-  // randomize settings
-  let order = [2, 3, 4]
-  order = nn.shuffle(order)
-  // while most values glitch on Firefox/Mac
-  // only these values seem to work on Chrome/Mac
-  // (have not tested on other platforms yet)
-  const gvals = [7, 19, 35, 45, 46, 79, 86, 87, 90, 96]
-
-  syrup.pixelate.process = true
-  syrup.pixelate.opacity = nn.random(0.5, 1)
-  syrup.pixelate.zIndex = 1
-  syrup.pixelate.size = nn.random(6, 28)
-  syrup.pixelate.threshold = nn.random(16, 128)
-
-  syrup.huffhack.process = nn.random() > 0.5
-  syrup.huffhack.opacity = nn.random(0, 0.5)
-  syrup.huffhack.zIndex = order[0]
-  syrup.huffhack.seed = nn.random(gvals)
-
-  syrup.dither.process = nn.random() > 0.5
-  syrup.dither.opacity = nn.random()
-  syrup.dither.zIndex = order[1]
-  syrup.dither.algorithm = 'bayer'
-  syrup.dither.dotSize = nn.random([1, 3, 5])
-  syrup.dither.threshold = 174 // doesn't matter for bayer (only other algos)
-
-  syrup.ascii.process = nn.random() > 0.5
-  syrup.ascii.opacity = nn.random()
-  syrup.ascii.zIndex = order[2]
-  syrup.ascii.chars = nn.random(['O*.   ', 'O*.  ', 'O*. ', 'O*. '])
-  syrup.ascii.fontSize = nn.random(4, 12)
-  syrup.ascii.fgColor = nn.random(['black', 'white'])
-
-  // update image + container
-  const rmv = (e) => { e.style.opacity = 0; setTimeout(() => e.remove(), 600) }
-  let parent, second
-  const oldParent = syrup.parent
-  if (oldParent === '.grid div:nth-child(4)') {
-    nn.getAll('.grid div:nth-child(4) img').forEach(rmv)
-    parent = '.grid div:nth-child(5)'
-    second = '.grid div:nth-child(6)'
-  } else {
-    nn.getAll('.grid div:nth-child(5) img').forEach(rmv)
-    parent = '.grid div:nth-child(4)'
-    second = '.grid div:nth-child(3)'
+// default settings for processed images
+// TODO: make customizable via bend panel
+const syrupSettings = {
+  huffhack: {
+    process: false,
+    opacity: 0.66,
+    zIndex: 3,
+    seed: 7
+  },
+  dither: {
+    process: true,
+    opacity: 0.67,
+    zIndex: 2,
+    algorithm: 'atkinson',
+    dotSize: 1,
+    threshold: 174
+  },
+  pixelate: {
+    process: true,
+    opacity: 1,
+    zIndex: 1,
+    size: 8,
+    threshold: 128
+  },
+  ascii: {
+    process: true,
+    opacity: 0.5,
+    zIndex: 4,
+    chars: 'O*',
+    fontSize: 8,
+    fgColor: 'white'
   }
-  syrup.updateInit({ image, parent, second })
-
-  // update clean image
-  clean.style.opacity = 0
-  setTimeout(() => {
-    clean.remove()
-    clean = nn.create('img').set('src', image).set('name', 'clean').addTo(parent)
-  }, 600)
-
-  // update event listeners
-  const hide = (e) => { if (e.name !== 'clean') e.style.opacity = 0 }
-  const show = (e) => { if (e.name !== 'clean') { e.style.opacity = syrup[e.name].opacity } }
-  nn.get(oldParent).onmouseover = null
-  nn.get(oldParent).onmouseout = null
-  nn.get(parent).onmouseover = () => nn.getAll(`${parent} img`).forEach(hide)
-  nn.get(parent).onmouseout = () => nn.getAll(`${parent} img`).forEach(show)
 }
 
-function main () {
-  // setup splash page slide show
-  splash = new NetizenASCIISplash({
-    ele: '#splash-canvas',
-    images: [
-      'images/walking-tour/netwalkingtour4.jpg',
-      'images/walking-tour/netwalkingtour3.jpg',
-      'images/walking-tour/netwalkingtour2.jpg',
-      'images/walking-tour/netwalkingtour1.jpg'
-    ],
-    holdTime: 6000,
-    fadeTime: 1000,
-    scrambleTime: 10,
-    asciiHoldTime: 3000,
-    aspectWidth: 16,
-    aspectHeight: 9
+const asciiBlockCSS = {
+  height: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+}
+
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+// *.O                             util functions                          *.O
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+async function loadData () {
+  const res = await window.fetch('data/main.json')
+  if (!res.ok) throw new Error(`Failed to load data: ${res.status}`)
+  return await res.json()
+}
+
+async function loadASCIIArt (o) {
+  try {
+    const res = await window.fetch(o.path)
+    if (!res.ok) throw new Error(`Failed to fetch ${o.path}: ${res.status} ${res.statusText}`)
+    const ascii = await res.text()
+    const asciiFrame = nn.create('div').css(asciiBlockCSS).addTo(o.parent)
+    const color = nn.isLight(o.parent.style.backgroundColor) ? '#000' : '#fff'
+    const styles = o.css || {}
+    styles.color = color
+    const ele = nn.create('pre')
+      .content(ascii)
+      .addTo(asciiFrame)
+      .css(styles)
+    if (o.link) ele.on('click', () => window.open(o.link, '_blank'))
+    return ele
+  } catch (err) {
+    console.error('loadTextFile error:', err)
+    throw err
+  }
+}
+
+function resetGridAndContent (exceptInitatives) {
+  grid.clearAllBlocks()
+  // clear all syrup images
+  nn.getAll('.syrup').forEach(ele => {
+    ele.classList.remove('syrup')
+    ele.querySelectorAll('img').forEach(img => img.remove())
+    ele.onmouseover = null
+    ele.onmouseout = null
+    ele.onclick = null
+  })
+  // remove any extra grids
+  nn.getAll('.grid').filter(d => d.id !== 'main-grid').forEach(d => d.remove())
+
+  if (exceptInitatives) return
+  // reset initatives
+  const subNav = content.ele.children[0]
+  subNav.classList.remove('sub-nav')
+  subNav.querySelectorAll('*').forEach(e => e.remove())
+  // revert center cell-content to original colors
+  content.ele.children[1].style.background = 'var(--prim-b)'
+  content.ele.children[1].style.color = 'var(--prim-a)'
+}
+
+function addSyrupImgToGrid (opts = {}) {
+  opts.ele1.classList.add('syrup')
+
+  const syrup = new NetizenSyrupImage({
+    image: opts.path,
+    ele: opts.ele1,
+    colors: [opts.ele1.style.backgroundColor, opts.ele2.style.backgroundColor],
+    huffhack: syrupSettings.huffhack,
+    dither: syrupSettings.dither,
+    pixelate: syrupSettings.pixelate,
+    ascii: syrupSettings.ascii
   })
 
-  // setup initial grid layout
-  grid = new NetizenGrid({
-    ele: '.grid div',
-    grids: [
-      [
-        { x: 0, y: 0, w: 1, h: 2 },
-        { x: 1, y: 0, w: 2, h: 2 },
-
-        { x: 3, y: 0, w: 3, h: 1 },
-        { x: 3, y: 1, w: 3, h: 2 },
-
-        { x: 0, y: 2, w: 2, h: 1 },
-        { x: 2, y: 2, w: 1, h: 1 },
-
-        { x: 0, y: 3, w: 4, h: 1 },
-        { x: 4, y: 3, w: 2, h: 1 }
-      ],
-      [
-        { x: 0, y: 0, w: 1, h: 1 },
-        { x: 1, y: 0, w: 2, h: 1 },
-
-        { x: 3, y: 0, w: 3, h: 2 },
-        { x: 3, y: 2, w: 3, h: 1 },
-
-        { x: 0, y: 1, w: 2, h: 2 },
-        { x: 2, y: 1, w: 1, h: 2 },
-
-        { x: 0, y: 3, w: 2, h: 1 },
-        { x: 2, y: 3, w: 4, h: 1 }
-      ]
-    ]
-  })
-
-  bent = new NetizenBentText({
-    parent: '.grid div:nth-child(1)',
-    text: ['BEND', 'THIS', 'SITE'],
-    color: nn.get('.grid div:nth-child(2)').style.backgroundColor,
-    padding: 10,
-    xOverlap: 30,
-    yOverlap: 80
-  })
-
-  const randomImage = `images/dream/${nn.random(images)}.jpg`
-  syrup = new NetizenSyrupImage({
-    image: randomImage,
-    parent: '.grid div:nth-child(4)',
-    second: '.grid div:nth-child(3)'
-  })
-
-  clean = nn.create('img')
-    .set('src', randomImage)
+  nn.create('img')
+    .set('src', opts.path)
     .set('name', 'clean')
-    .addTo('.grid div:nth-child(4)')
+    .addTo(opts.ele1)
 
-  nn.get('.grid div:nth-child(4)').onmouseover = () => {
-    nn.getAll('.grid div:nth-child(4) img').forEach(img => {
+  opts.ele1.onmouseover = () => {
+    opts.ele1.querySelectorAll('img').forEach(img => {
       if (img.name !== 'clean') img.style.opacity = 0
     })
   }
-  nn.get('.grid div:nth-child(4)').onmouseout = () => {
-    nn.getAll('.grid div:nth-child(4) img').forEach(img => {
+  opts.ele1.onmouseout = () => {
+    opts.ele1.querySelectorAll('img').forEach(img => {
       if (img.name !== 'clean') {
         img.style.opacity = syrup[img.name].opacity
       }
     })
   }
 
-  nn.get('.grid').on('click', () => {
-    grid.animateToGrid()
-    updateSyrup()
+  if (opts.callback) opts.ele1.onclick = () => opts.callback()
+}
+
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+// *.O                  nav section change functions                       *.O
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+function showHome () {
+  if (nav.state === 0) return
+
+  if (content.showing) {
+    content.hide()
+    splash.start()
+  }
+
+  resetGridAndContent()
+
+  addSyrupImgToGrid({
+    path: 'images/the-crew.jpg',
+    ele1: grid.getBlock(4),
+    ele2: grid.getBlock(3),
+    callback: () => nav.updatePage('about')
   })
+
+  loadASCIIArt({
+    path: 'ascii-art/cows.txt',
+    parent: grid.getBlock(7),
+    link: 'http://www.textfiles.com/art/cow.txt'
+  })
+
+  grid.transitionTo(window.grids.default)
+
+  if (bendPanel.showing) bendPanel.hidePanel()
+  bendPanel.enable()
+}
+
+// --------------------------------------------------------------- ABOUT SECTION
+function showAbout () {
+  if (nav.state === 'about') return
+
+  resetGridAndContent()
+
+  content.show('about')
+
+  splash.stop()
+
+  grid.transitionTo(window.grids.default)
+
+  loadASCIIArt({
+    path: 'ascii-art/cows.txt',
+    parent: grid.getBlock(7),
+    link: 'http://www.textfiles.com/art/cow.txt'
+  })
+
+  nn.create('img')
+    .set('src', 'images/the-crew.jpg')
+    .css({ cursor: 'auto' })
+    .addTo(grid.getBlock(4))
+}
+
+// --------------------------------------------------------- INITIATIVES SECTION
+function showInitiatives () {
+  if (nav.state === 'initiatives') return
+  content.show('initiatives')
+
+  resetGridAndContent()
+
+  const subNav = content.ele.children[0]
+  subNav.className = 'sub-nav'
+  window.data._initativesOrder.forEach(proj => {
+    const key = proj.split('.')[0]
+    const obj = window.data.initiatives[key]
+    const item = nn.create('span')
+      .content(obj.title)
+      .set('class', 'sub-nav-item')
+      .addTo(subNav)
+      .on('click', () => window.loadCaseStudy(obj, item))
+    setTimeout(() => { item.style.opacity = 1 }, 900)
+  })
+
+  grid.transitionTo(window.grids.initiatives)
+}
+
+// ------------------------------------------------------------- SUPPORT SECTION
+function showSupport () {
+  if (nav.state === 'support') return
+  resetGridAndContent()
+  content.show('support')
+
+  grid.transitionTo(window.grids.default)
+
+  const asciiBlock = grid.grid === window.grids.default
+    ? grid.getBlock(4) : grid.getBlock(5)
+  loadASCIIArt({
+    path: 'ascii-art/netizen-heart.txt',
+    parent: asciiBlock,
+    css: { letterSpacing: '0.75rem' }
+  })
+}
+
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+// *.O                             main function                           *.O
+// *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+async function main () {
+  // load initial data
+  window.data = await loadData()
+  window.data._initativesOrder = [...window.data.initiatives]
+  window.data.initiatives = {}
+  window.data._initativesOrder.forEach(async file => {
+    const res = await window.fetch(`data/initiatives/${file}`)
+    const json = await res.json()
+    const name = file.split('.')[0]
+    window.data.initiatives[name] = json
+    window.data.initiatives[name].name = name
+  })
+
+  // setup the nav menu
+  nav = new NetizenNav({
+    parent: 'header',
+    logo: '#netizen-logo',
+    onSelection: (sec) => {
+      switch (sec) {
+        case 'logo': showHome(); break
+        case 'about': showAbout(); break
+        case 'initiatives': showInitiatives(); break
+        case 'support': showSupport(); break
+      }
+    }
+  })
+
+  // setup splash page slide show
+  splash = new NetizenASCIISplash({
+    fontSize: 16,
+    ele: nn.get('#splash-canvas'),
+    radius: 200,
+    duration: 1000,
+    images: nn.shuffle([
+      'images/walking-tour/netwalkingtour4.jpg',
+      'images/walking-tour/netwalkingtour3.jpg',
+      'images/netnet/netnet1.jpg',
+      'images/netnet/netnet4.jpg',
+      'images/dream/dream2.jpg',
+      'images/dream/dream12.jpg'
+    ])
+  })
+
+  // setup content section (displays over the splash + above the grid)
+  content = new NetizenContentBlock()
+
+  // setup main grid section
+  grid = new NetizenGrid({
+    selector: '#main-grid',
+    grid: window.grids.default
+  })
+
+  // setup bend panel
+  await document.fonts.load('200px Fira Mono')
+  bendPanel = new NetizenBendPanel({
+    ele: grid.getBlock(1),
+    onShow: () => {
+      const t = nn.get('.grid').top + window.pageYOffset - nn.get('header').height
+      window.scrollTo({ top: t, behavior: 'smooth' })
+      grid.transitionTo(window.grids.bendPanel)
+      // remove the crew fromt the grid
+      nn.getAll('.syrup').forEach(ele => {
+        ele.classList.remove('syrup')
+        ele.querySelectorAll('img').forEach(img => img.remove())
+        ele.onmouseover = null
+        ele.onmouseout = null
+        ele.onclick = null
+      })
+    },
+    onHide: () => {
+      grid.transitionTo(window.grids.default)
+      // add crew back to grid
+      addSyrupImgToGrid({
+        path: 'images/the-crew.jpg',
+        ele1: grid.getBlock(4),
+        ele2: grid.getBlock(3),
+        callback: () => nav.updatePage('about')
+      })
+    }
+  })
+
+  // popualte the inital grid
+  loadASCIIArt({
+    path: 'ascii-art/cows.txt',
+    parent: grid.getBlock(7),
+    link: 'http://www.textfiles.com/art/cow.txt'
+  })
+
+  addSyrupImgToGrid({
+    path: 'images/the-crew.jpg',
+    ele1: grid.getBlock(4),
+    ele2: grid.getBlock(3),
+    callback: () => nav.updatePage('about')
+  })
+
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  await nn.sleep(300)
+  nn.get('#loader').css('opacity', 0)
+  setTimeout(() => nn.get('#loader').css('display', 'none'), 800)
 }
 
 nn.on('load', main)

@@ -1,476 +1,322 @@
 /* global nn */
-
 class NetizenASCIISplash {
   constructor (opts = {}) {
-    this.ele = opts.ele
-    this.images = opts.images || []
-    this.holdTime = opts.holdTime || 5000
-    this.fadeTime = opts.fadeTime || 1000
-    this.scrambleTime = opts.scrambleTime || 4000
-    this.asciiHoldTime = opts.asciiHoldTime || 3000
-    this.aspectWidth = opts.aspectWidth || 16
-    this.aspectHeight = opts.aspectHeight || 9
-    this.fontSize = opts.fontSize || 16
-    this.fontFamily = opts.fontFamily || 'Fira Mono, Courier New, monospace'
-    this.asciiCore = opts.asciiCore || ['.', '*', 'O', 'O']
-    this.asciiChars = opts.asciiChars || [
-      ' ', '.', ':', '-', '=', '+', '*', '#', '%', '@', 'O',
-      'O', '@', '%', '#', '*', '+', '=', '-', ':', '.', ' ',
-      ' ', '.', ':', '-', '=', '+', '*', '#', '%', '@', 'O',
-      'O', '@', '%', '#', '*', '+', '=', '-', ':', '.', ' ',
-      ' ', '.', ':', '-', '=', '+', '*', '#', '%', '@', 'O',
-      'O', '@', '%', '#', '*', '+', '=', '-', ':', '.', ' '
-    ]
+    this.container = opts.ele || document.body
+    if (Array.isArray(opts.images)) {
+      this.imageList = opts.images
+      this.currentIndex = 0
+      this.imagePath = this.imageList[0]
+    } else {
+      this.imageList = null
+      this.imagePath = opts.images
+    }
 
-    this._currentImage = null
-    this._currentAscii = null
-    this._mode = 'color'
+    this.charSet = opts.chars || 'OO*. '
+    this.fontSize = opts.fontSize || 8
+    this.radius = opts.radius || 100 // size of the Ascii Circle
+    this.duration = opts.duration || 2000 // how long before we remove an Ascii Circle
+    this.removeRate = opts.removeRate || 10 // how many chars to remove from Ascii Circle
+    this.transitionWait = opts.transitionWait || 2000 // how long to wait before next Ascii image fades into clean version
 
-    this.canvas = nn.get(this.ele)
-    this.canvas.css({
-      width: '100vw',
-      height: 'auto',
-      display: 'block'
-    })
-    this.ctx = this.canvas.getContext('2d')
+    // this.fgColor = 'white'
+    // this.bgColor = 'black'
+    // this.bgColorB = 'rgba(0, 0, 0, 0.8)'
 
-    const altTxt = 'A Slide show of netizen.org initiatives, the ASCII symbols "*", "." and "O" print across the screen to transition various images of events and projects from netizen\'s history'
-    this.canvas.setAttribute('aria-label', altTxt)
-    this.canvas.textContent = altTxt
+    this.fgColor = 'black'
+    this.bgColor = 'white'
+    this.bgColorB = 'rgba(255, 255, 255, 0.8)'
+
+    this.drawnCells = {} // { "col-row": count }
+    this.overlays = [] // [{ canvas, cells:[ "col-row", ... ] }]
+    this.locked = false
+    this.click = 0
 
     this.init()
-    this.initCanvasSize()
-
-    this._transitioning = false
-    this._needResize = false
-
-    nn.on('resize', () => {
-      clearTimeout(this._splashResize)
-      this._splashResize = setTimeout(() => {
-        if (this._transitioning) {
-          this._needResize = true
-        } else {
-          this._onResize()
-        }
-      }, 200)
-    })
   }
 
   async init () {
-    // load all images
-    const imgs = await Promise.all(
-      this.images.map(src => nn.loadImage(src))
-    )
+    this.canvas = document.createElement('canvas')
+    Object.assign(this.canvas.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      display: 'block'
+    })
+    this.container.appendChild(this.canvas)
+    this.ctx = this.canvas.getContext('2d')
 
-    let idx = 0
-    while (true) { // infinite loop
-      const curr = imgs[idx]
-      await this.showFullColor(curr)
-      const nextIdx = (idx + 1) % imgs.length
-      await this.transition(curr, imgs[nextIdx])
-      idx = nextIdx
-    }
+    try {
+      this.img = await this.loadImage(this.imagePath)
+      this.resizeCanvas()
+      this.drawImageCover()
+    } catch (err) { console.error('Failed to load image:', err) }
+
+    window.addEventListener('resize', () => {
+      this.resizeCanvas()
+      this.drawImageCover()
+    })
+
+    this.canvas.addEventListener('mousemove', this.onHover.bind(this))
+    this.canvas.addEventListener('click', this.onClick.bind(this))
   }
 
-  initCanvasSize () {
-    const w = this.canvas.clientWidth
-    const h = Math.floor(w * this.aspectHeight / this.aspectWidth)
+  resizeCanvas () {
+    const w = window.innerWidth
+    const h = w * 9 / 16
     this.canvas.width = w
     this.canvas.height = h
+    this.container.style.height = `${h}px`
   }
 
-  _onResize () {
-    // 1) resize the canvas element & buffer
-    this.initCanvasSize()
+  stop () { this.locked = true }
 
-    // 2) redraw whichever mode we’re in, at the new resolution/font
-    if (this._mode === 'color') {
-      this.drawFullColor()
-    } else if (this._mode === 'ascii') {
-      // regenerate ASCII at this new size
-      const ascii = this.generateAscii(this._currentImage)
-      this._currentAscii = ascii
-      this.drawCurrentAscii()
+  start () { this.locked = false }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+  onHover (e) {
+    if (this.locked) return
+    const rect = this.canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    this.drawAsciiCircle(x, y)
+  }
+
+  async onClick (e) {
+    if (this.locked) return
+
+    this.click++
+
+    this.clearStack()
+
+    // if we've got an image list && we've clicked twice (not just once)
+    if (this.imageList && this.click % 2 === 0) { // then move onto next image
+      this.currentIndex = (this.currentIndex + 1) % this.imageList.length
+      this.imagePath = this.imageList[this.currentIndex]
+      this.img = await this.loadImage(this.imagePath)
+      this.drawImageCover(true)
+      this.locked = true
     }
+
+    this.drawAsciiCover()
   }
 
-  // main transition logix
-  async transition (imgA, imgB) {
-    this._transitioning = true
-    try {
-      const asciiA = this.generateAscii(imgA)
-      const asciiB = this.generateAscii(imgB)
-      await this.fadeToAscii(imgA, asciiA)
-      await this.fadeOutBackground(imgA, asciiA)
-      await nn.sleep(this.asciiHoldTime)
-      // await this.scanLineWaveAscii(asciiA, asciiB)
-      await this.sequentialAscii(asciiA, asciiB)
-      await this.fadeToColor(imgB, asciiB)
-    } finally {
-      this._transitioning = false
-      if (this._needResize) {
-        this._needResize = false
-        this._onResize()
-      }
-    }
-  }
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
-  drawFullColor () {
-    if (!this._currentImage) return
-    const img = this._currentImage
-    const { sx, sy, sw, sh } = this.getCoverParams(img, this.canvas.width, this.canvas.height)
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.ctx.drawImage(
-      img,
-      sx, sy, sw, sh,
-      0, 0, this.canvas.width, this.canvas.height
-    )
-  }
-
-  drawCurrentAscii () {
-    if (!this._currentAscii) return
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.ctx.font = `${this.fontSize}px ${this.fontFamily}`
-    this.ctx.textBaseline = 'top'
-    this.ctx.fillStyle = 'white'
-    this._currentAscii.forEach((row, y) =>
-      this.ctx.fillText(row, 0, y * this.fontSize)
-    )
-  }
-
-  // same effect as CSS bg "cover"
-  /* returns { sx, sy, sw, sh } in image‐space */
-  getCoverParams (img, cvsW, cvsH) {
-    const iw = img.naturalWidth
-    const ih = img.naturalHeight
-    const scale = Math.max(cvsW / iw, cvsH / ih)
-    // size of the source box we need to crop out of the image
-    const sw = cvsW / scale
-    const sh = cvsH / scale
-    // center that box in the image
-    const sx = (iw - sw) / 2
-    const sy = (ih - sh) / 2
-    return { sx, sy, sw, sh }
-  }
-
-  showFullColor (img) {
-    return new Promise(resolve => {
-      // track
-      this._currentImage = img
-      this._currentAscii = null
-      this._mode = 'color'
-      // draw + hold
-      this.drawFullColor()
-      setTimeout(resolve, this.holdTime)
+  loadImage (path) {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image()
+      img.onload = () => resolve(img)
+      img.onerror = err => reject(err)
+      img.src = path
     })
   }
 
-  // convert one image→array of strings at current resolution
-  generateAscii (img) {
-    // measure char dims
-    const mctx = nn.create('canvas').getContext('2d')
-    mctx.font = `${this.fontSize}px ${this.fontFamily}`
-    const cw = mctx.measureText('M').width
-    const ch = this.fontSize
-    const cols = Math.floor(this.canvas.width / cw)
-    const rows = Math.floor(this.canvas.height / ch)
-
-    // get the same cover‐crop you use for the main canvas
-    const cover = this.getCoverParams(img, this.canvas.width, this.canvas.height)
-
-    // offscreen draw with cover cropping → low‐res grid
-    const off = nn.create('canvas')
-    off.width = cols
-    off.height = rows
-    const oc = off.getContext('2d')
-    oc.drawImage(
-      img,
-      cover.sx, cover.sy, cover.sw, cover.sh, // source rect
-      0, 0, cols, rows // dest rect
-    )
-
-    const data = oc.getImageData(0, 0, cols, rows).data
-    const out = []
-    for (let y = 0; y < rows; y++) {
-      let row = ''
-      for (let x = 0; x < cols; x++) {
-        const i = (y * cols + x) * 4
-        const bri = (data[i] + data[i + 1] + data[i + 2]) / 3
-        row += this.pickAscii(bri)
+  clearStack () {
+    this.overlays.forEach(o => {
+      if (o.canvas.parentNode === this.container) {
+        this.container.removeChild(o.canvas)
       }
-      out.push(row)
-    }
-    return out
-  }
-
-  pickAscii (bri) {
-    // bri: 0-255
-    const norm = bri / 255 // 0-1
-    const maxI = this.asciiCore.length - 1
-    const idx = Math.floor(norm * maxI)
-    return this.asciiCore[idx]
-  }
-
-  // fade full-color→ascii overlay
-  fadeToAscii (img, ascii) {
-    return new Promise(resolve => {
-      // capture color frame with cover
-      const cOff = nn.create('canvas')
-      cOff.width = this.canvas.width
-      cOff.height = this.canvas.height
-      const cc = cOff.getContext('2d')
-      const cover = this.getCoverParams(img, this.canvas.width, this.canvas.height)
-      cc.drawImage(
-        img,
-        cover.sx, cover.sy, cover.sw, cover.sh,
-        0, 0, this.canvas.width, this.canvas.height
-      )
-
-      const steps = Math.ceil(this.fadeTime / 16)
-      let i = 0
-      const step = () => {
-        const t = i / steps
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        this.ctx.drawImage(cOff, 0, 0)
-        this.ctx.globalAlpha = t
-        this.drawAscii(ascii)
-        this.ctx.globalAlpha = 1
-        if (i++ < steps) window.requestAnimationFrame(step)
-        else {
-          // track
-          this._mode = 'ascii'
-          this._currentAscii = ascii
-          resolve()
-        }
-      }
-      step()
+      o.cells.forEach(id => delete this.drawnCells[id])
     })
+    this.overlays = []
   }
 
-  async sequentialAscii (asciiA, asciiB, batchSize = 8) {
-    const rows = asciiA.length
-    const cols = asciiA[0].length
-    const total = rows * cols
-    const numBatches = Math.ceil(total / batchSize)
-    const msPerBatch = this.scrambleTime / numBatches
+  drawImageCover (overlay) {
+    const cw = this.canvas.width
+    const ch = this.canvas.height
+    const iw = this.img.naturalWidth
+    const ih = this.img.naturalHeight
+    const canvasRatio = cw / ch
+    const imageRatio = iw / ih
+    let sx, sy, sw, sh
 
-    // measure character cell size
-    const mctx = nn.create('canvas').getContext('2d')
-    mctx.font = `${this.fontSize}px ${this.fontFamily}`
-    const cw = mctx.measureText('M').width
-    const ch = this.fontSize
-
-    // flatten all positions in row-major order
-    const positions = []
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        positions.push({ y, x })
-      }
+    if (imageRatio > canvasRatio) {
+      sw = ih * canvasRatio; sh = ih
+      sx = (iw - sw) / 2; sy = 0
+    } else {
+      sw = iw; sh = iw / canvasRatio
+      sx = 0; sy = (ih - sh) / 2
     }
 
-    // current mutable grid
-    const current = asciiA.map(r => r.split(''))
+    this.ctx.clearRect(0, 0, cw, ch)
+    this.ctx.drawImage(this.img, sx, sy, sw, sh, 0, 0, cw, ch)
 
-    // track mode & state
-    this._mode = 'ascii'
-    this._currentAscii = asciiA
-
-    // prepare drawing style
-    this.ctx.font = `${this.fontSize}px ${this.fontFamily}`
-    this.ctx.textBaseline = 'top'
-    this.ctx.fillStyle = 'white'
-
-    // process each batch
-    for (let b = 0; b < numBatches; b++) {
-      const start = b * batchSize
-      const end = Math.min(start + batchSize, total)
-      for (let i = start; i < end; i++) {
-        const { y, x } = positions[i]
-        const chTarget = asciiB[y][x]
-        current[y][x] = chTarget
-
-        // clear & draw this cell
-        this.ctx.clearRect(x * cw, y * ch, cw, ch)
-        this.ctx.fillText(chTarget, x * cw, y * ch)
-      }
-      // wait before next batch
-      await nn.sleep(msPerBatch)
-    }
-
-    // finalize stored ASCII
-    this._currentAscii = current.map(r => r.join(''))
-  }
-
-  // wave-staggered sequential scramble
-  scanLineWaveAscii (asciiA, asciiB) {
-    return new Promise(resolve => {
-      const chars = this.asciiChars
-      const L = chars.length
-      const rows = asciiA.length
-      const cols = asciiA[0].length
-
-      // map each cell to start/target indices
-      const startIdx = asciiA.map(r => r.split('').map(c => chars.indexOf(c)))
-      const targetIdx = asciiB.map(r => r.split('').map(c => chars.indexOf(c)))
-
-      // local steps needed per cell = one full cycle + forward distance
-      const localSteps = startIdx.map((row, y) =>
-        row.map((s, x) => {
-          const dist = (targetIdx[y][x] - s + L) % L
-          return L + dist
+    if (overlay) { // if we're transitioning to a new image
+      // draw clean overlay of new image (assuming the main canvas is ascii-fied)
+      const overlay = nn.create('canvas')
+        .set({ width: cw, height: ch })
+        .css({
+          position: 'absolute',
+          pointerEvents: 'none',
+          opacity: 0,
+          transition: 'opacity 0.8s var(--out-cubic)'
         })
-      )
-
-      // find the max local steps across all cells
-      const maxLocal = localSteps.reduce(
-        (m, row) => Math.max(m, ...row), 0
-      )
-
-      // global timeline runs long enough for last column to finish
-      const globalMax = maxLocal + (cols - 1)
-      const interval = this.scrambleTime / globalMax
-
-      let step = 0
-      const iv = setInterval(() => {
-        // clear & prep
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        this.ctx.font = `${this.fontSize}px ${this.fontFamily}`
-        this.ctx.textBaseline = 'top'
-        this.ctx.fillStyle = 'white'
-
-        // draw row by row
-        for (let y = 0; y < rows; y++) {
-          let line = ''
-          for (let x = 0; x < cols; x++) {
-            if (step < x) {
-              // not started yet: show original
-              line += chars[startIdx[y][x]]
-            } else {
-              const localStep = step - x
-              if (localStep < localSteps[y][x]) {
-                // mid-cycle: advance one per tick
-                const idx = (startIdx[y][x] + localStep) % L
-                line += chars[idx]
-              } else {
-                // done: lock on target
-                line += chars[targetIdx[y][x]]
-              }
-            }
-          }
-          this.ctx.fillText(line, 0, y * this.fontSize)
-        }
-
-        step++
-        if (step > globalMax) {
-          clearInterval(iv)
-          resolve()
-        }
-      }, interval)
-    })
+        .addTo(this.container)
+      const octx = overlay.getContext('2d')
+      octx.drawImage(this.img, sx, sy, sw, sh, 0, 0, cw, ch)
+      // wait for a while, then fade in the clean canvas
+      setTimeout(() => {
+        overlay.style.opacity = 1
+        setTimeout(() => { // when fade is complete
+          // replace (assumed) ascii-fied canvas with clean image
+          this.ctx.clearRect(0, 0, cw, ch)
+          this.ctx.drawImage(this.img, sx, sy, sw, sh, 0, 0, cw, ch)
+          overlay.remove() // ...then remove clean overlay
+          this.locked = false
+        }, 800)
+      }, this.transitionWait)
+    }
   }
 
-  // fade ascii→full-color
-  fadeToColor (img, ascii) {
-    return new Promise(resolve => {
-      // build ascii offscreen
-      const aOff = nn.create('canvas')
-      aOff.width = this.canvas.width
-      aOff.height = this.canvas.height
-      const ac = aOff.getContext('2d')
-      ac.font = `${this.fontSize}px ${this.fontFamily}`
-      ac.textBaseline = 'top'
-      ac.fillStyle = 'white'
-      ascii.forEach((row, y) =>
-        ac.fillText(row, 0, y * this.fontSize)
-      )
-
-      // build color offscreen with cover
-      const cOff = nn.create('canvas')
-      cOff.width = this.canvas.width
-      cOff.height = this.canvas.height
-      const cc = cOff.getContext('2d')
-      const cover = this.getCoverParams(img, this.canvas.width, this.canvas.height)
-      cc.drawImage(
-        img,
-        cover.sx, cover.sy, cover.sw, cover.sh,
-        0, 0, this.canvas.width, this.canvas.height
-      )
-
-      const steps = Math.ceil(this.fadeTime / 16)
-      let i = 0
-      const step = () => {
-        const t = i / steps
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        this.ctx.globalAlpha = 1 - t
-        this.ctx.drawImage(aOff, 0, 0)
-        this.ctx.globalAlpha = t
-        this.ctx.drawImage(cOff, 0, 0)
-        this.ctx.globalAlpha = 1
-        if (i++ < steps) window.requestAnimationFrame(step)
-        else {
-          // track
-          this._mode = 'color'
-          this._currentAscii = null
-          resolve()
-        }
-      }
-      step()
-    })
-  }
-
-  // fade out the color beneath your ASCII, leaving ASCII only
-  fadeOutBackground (img, ascii) {
-    return new Promise(resolve => {
-      // build offscreen color buffer
-      const cOff = nn.create('canvas')
-      cOff.width = this.canvas.width
-      cOff.height = this.canvas.height
-      const cc = cOff.getContext('2d')
-      const cover = this.getCoverParams(img, this.canvas.width, this.canvas.height)
-      cc.drawImage(
-        img,
-        cover.sx, cover.sy, cover.sw, cover.sh,
-        0, 0, this.canvas.width, this.canvas.height
-      )
-
-      // build offscreen ASCII buffer
-      const aOff = nn.create('canvas')
-      aOff.width = this.canvas.width
-      aOff.height = this.canvas.height
-      const ac = aOff.getContext('2d')
-      ac.font = `${this.fontSize}px ${this.fontFamily}`
-      ac.textBaseline = 'top'
-      ac.fillStyle = 'white'
-      ascii.forEach((row, y) =>
-        ac.fillText(row, 0, y * this.fontSize)
-      )
-
-      const steps = Math.ceil(this.fadeTime / 16)
-      let i = 0
-      const step = () => {
-        const t = i / steps
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        // draw color fading out
-        this.ctx.globalAlpha = 1 - t
-        this.ctx.drawImage(cOff, 0, 0)
-        // draw ASCII fully
-        this.ctx.globalAlpha = 1
-        this.ctx.drawImage(aOff, 0, 0)
-        if (i++ < steps) window.requestAnimationFrame(step)
-        else resolve()
-      }
-      step()
-    })
-  }
-
-  // helper to draw an ascii array
-  drawAscii (ascii) {
-    this.ctx.font = `${this.fontSize}px ${this.fontFamily}`
+  drawAsciiCover () {
+    const fs = this.fontSize
+    const cw = this.canvas.width
+    const ch = this.canvas.height
+    const chars = this.charSet
+    const cols = Math.floor(cw / fs)
+    const rows = Math.floor(ch / fs)
+    // grab current image pixels
+    const data = this.ctx.getImageData(0, 0, cw, ch).data
+    // clear to black background
+    this.ctx.fillStyle = this.bgColor
+    this.ctx.fillRect(0, 0, cw, ch)
+    this.ctx.font = `${fs}px monospace`
+    this.ctx.fillStyle = this.fgColor
     this.ctx.textBaseline = 'top'
-    this.ctx.fillStyle = 'white'
-    ascii.forEach((row, y) =>
-      this.ctx.fillText(row, 0, y * this.fontSize)
-    )
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const px = Math.floor(col * fs + fs / 2)
+        const py = Math.floor(row * fs + fs / 2)
+        const idx = (py * cw + px) * 4
+        const avg = (data[idx] + data[idx + 1] + data[idx + 2]) / 3
+        const ci = Math.floor((avg / 255) * (chars.length - 1))
+        const glyph = chars.charAt(chars.length - 1 - ci)
+        this.ctx.fillText(glyph, col * fs, row * fs)
+      }
+    }
+  }
+
+  drawAsciiCircle (x, y) {
+    const r = this.radius
+    const fs = this.fontSize
+    const cw = this.canvas.width
+    const ch = this.canvas.height
+
+    // compute grid cell bounds whose centers might lie in circle
+    const colMin = Math.max(0, Math.ceil((x - r - fs / 2) / fs))
+    const rowMin = Math.max(0, Math.ceil((y - r - fs / 2) / fs))
+    const colMax = Math.min(Math.floor((x + r - fs / 2) / fs), Math.floor((cw - fs / 2) / fs))
+    const rowMax = Math.min(Math.floor((y + r - fs / 2) / fs), Math.floor((ch - fs / 2) / fs))
+    if (colMax < colMin || rowMax < rowMin) return
+
+    const cols = colMax - colMin + 1
+    const rows = rowMax - rowMin + 1
+    const left = colMin * fs
+    const top = rowMin * fs
+    const w = cols * fs
+    const h = rows * fs
+
+    // block = original image data
+    const block = this.ctx.getImageData(left, top, w, h).data
+    const overlay = nn.create('canvas')
+      .set({ width: w, height: h })
+      .css({
+        position: 'absolute',
+        left: `${left}px`,
+        top: `${top}px`,
+        pointerEvents: 'none'
+      })
+    const octx = overlay.getContext('2d')
+    const chars = this.charSet
+
+    // collect cells this overlay draws on
+    const myCells = []
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const cx = left + col * fs + fs / 2
+        const cy = top + row * fs + fs / 2
+        const dx = cx - x
+        const dy = cy - y
+        if (dx * dx + dy * dy > r * r) continue
+
+        const cellId = `${colMin + col}-${rowMin + row}`
+        if (this.drawnCells[cellId]) continue
+
+        // sample brightness in this fs×fs cell
+        let sum = 0
+        let cnt = 0
+        for (let py = 0; py < fs; py++) {
+          for (let px = 0; px < fs; px++) {
+            const idx = ((row * fs + py) * w + (col * fs + px)) * 4
+            sum += (block[idx] + block[idx + 1] + block[idx + 2]) / 3
+            cnt++
+          }
+        }
+        let avg = sum / cnt
+        if (this.bgColor === 'white') avg = 255 - avg
+        const ci = Math.floor((avg / 255) * (chars.length - 1))
+        const ch = chars.charAt(chars.length - 1 - ci)
+
+        // draw transparent bg + char
+        octx.fillStyle = this.bgColorB
+        octx.fillRect(col * fs, row * fs, fs, fs)
+        octx.font = `${fs}px monospace`
+        octx.fillStyle = this.fgColor
+        octx.fillText(ch, col * fs, (row + 1) * fs)
+
+        // mark as drawn
+        this.drawnCells[cellId] = 1
+        myCells.push(cellId)
+      }
+    }
+
+    if (myCells.length === 0) return
+    this.container.appendChild(overlay)
+    this.overlays.push({ canvas: overlay, cells: myCells })
+
+    // schedule removal & free those cells
+    setTimeout(() => this.removeAsciiCircle(overlay, myCells), this.duration)
+  }
+
+  removeAsciiCircle (canvas, cells) {
+    const fs = this.fontSize
+    const interval = 30
+    const batchSize = this.removeRate
+    const offX = parseInt(canvas.style.left, 10)
+    const offY = parseInt(canvas.style.top, 10)
+    const ctx = canvas.getContext('2d')
+
+    // shuffle cells
+    const order = cells.slice()
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[order[i], order[j]] = [order[j], order[i]]
+    }
+
+    const steps = Math.ceil(order.length / batchSize)
+    for (let step = 0; step < steps; step++) {
+      setTimeout(() => {
+        const start = step * batchSize
+        const end = Math.min(start + batchSize, order.length)
+        for (let k = start; k < end; k++) {
+          const [col, row] = order[k].split('-').map(Number)
+          const x0 = col * fs - offX
+          const y0 = row * fs - offY
+          ctx.clearRect(x0, y0, fs, fs)
+        }
+      }, step * interval)
+    }
+
+    // once all batches have run, remove the canvas and free cells
+    setTimeout(() => {
+      if (canvas.parentNode === this.container) {
+        this.container.removeChild(canvas)
+      }
+      this.overlays = this.overlays.filter(o => o.canvas !== canvas)
+      cells.forEach(id => delete this.drawnCells[id])
+    }, steps * interval + interval)
   }
 }
 

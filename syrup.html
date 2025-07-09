@@ -23,6 +23,10 @@
         left: 50px;
         top: 50px;
       }
+
+      .grid > div {
+        transition: none;
+      }
     </style>
   </head>
   <body>
@@ -43,7 +47,14 @@
 
       const settings = {
         reset: () => window.location.reload(),
-        newColors: () => { grid.updateColors(); syrup.update() },
+        newColors: () => {
+          grid.updateColors()
+          const colors = [
+            grid.getBlock(1).style.backgroundColor,
+            grid.getBlock(2).style.backgroundColor
+          ]
+          syrup.update({ colors })
+        },
         randomize: () => randomize(),
         image: 'becca',
         transition: 0.5
@@ -169,23 +180,20 @@
       }
 
       const grid = new NetizenGrid({
-        ele: '.grid',
-        grids: [
-          [
-            { x: 0, y: 0, w: 3, h: 2 },
-            { x: 0, y: 2, w: 3, h: 1 }
-          ],
-          [
-            { x: 0, y: 0, w: 3, h: 1 },
-            { x: 0, y: 1, w: 3, h: 2 },
-          ]
+        selector: '.grid',
+        grid: [
+          { x: 0, y: 0, w: 3, h: 2 },
+          { x: 0, y: 2, w: 3, h: 1 }
         ]
       })
 
       const syrup = new NetizenSyrupImage({
         image: 'images/dream/becca.jpg',
-        parent: '.grid div:nth-child(1)',
-        second: '.grid div:nth-child(2)',
+        ele: grid.getBlock(1),
+        colors: [
+          grid.getBlock(1).style.backgroundColor,
+          grid.getBlock(2).style.backgroundColor
+        ],
         huffhack: huffhack,
         dither: dither,
         pixelate: pixelate,

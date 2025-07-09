@@ -1,17 +1,60 @@
 /* global nn */
 // also global: window.colors
+/*
+
+  // create a netizen.org grid
+
+  grid = new NetizenGrid({
+    selector: '.grid',
+    grid: [
+      { x: 0, y: 0, w: 1, h: 2 },
+      { x: 1, y: 0, w: 2, h: 2 },
+
+      { x: 3, y: 0, w: 3, h: 1 },
+      { x: 3, y: 1, w: 3, h: 2 },
+
+      { x: 0, y: 2, w: 2, h: 1 },
+      { x: 2, y: 2, w: 1, h: 1 },
+
+      { x: 0, y: 3, w: 4, h: 1 },
+      { x: 4, y: 3, w: 2, h: 1 }
+    ]
+  })
+
+*/
 
 class NetizenGrid {
   constructor (opts = {}) {
-    this.ele = opts.ele
+    this.ele = opts.selector
     this.totalCols = opts.cols || 6
     this.totalRows = opts.rows || 4
     this.placed = []
-    this.grids = opts.grids || []
+    this.grid = opts.grid || [
+      { x: 0, y: 0, w: 1, h: 2 },
+      { x: 1, y: 0, w: 2, h: 2 },
 
-    const grid = this.grids[0]
-    this.currentGrid = grid
+      { x: 3, y: 0, w: 3, h: 1 },
+      { x: 3, y: 1, w: 3, h: 2 },
 
+      { x: 0, y: 2, w: 2, h: 1 },
+      { x: 2, y: 2, w: 1, h: 1 },
+
+      { x: 0, y: 3, w: 4, h: 1 },
+      { x: 4, y: 3, w: 2, h: 1 }
+    ]
+
+    this.generateGrid(this.grid)
+  }
+
+  getBlock (num) {
+    return nn.get(`${this.ele} div:nth-child(${num})`)
+  }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                         creation logix                              *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+  generateGrid (grid) {
     for (let i = 0; i < grid.length; i += 2) {
       const cellA = grid[i]
       const cellB = grid[i + 1]
@@ -28,6 +71,27 @@ class NetizenGrid {
       this.createGridBlock(cellB, c2)
     }
   }
+
+  createGridBlock (cell, color) {
+    const leftPct = cell.x / this.totalCols * 100
+    const topPct = cell.y / this.totalRows * 100
+    const widthPct = cell.w / this.totalCols * 100
+    const heightPct = cell.h / this.totalRows * 100
+
+    nn.create('div')
+      .css({
+        left: `${leftPct}%`,
+        top: `${topPct}%`,
+        width: `${widthPct}%`,
+        height: `${heightPct}%`,
+        backgroundColor: color
+      })
+      .addTo(this.ele)
+  }
+
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O                             color logix                             *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
   isAdjacent (a, b) {
     const horiz = (a.x + a.w === b.x || b.x + b.w === a.x) &&
@@ -75,78 +139,96 @@ class NetizenGrid {
     return this.randomColorIndexes()
   }
 
-  createGridBlock (cell, color) {
-    const leftPct = cell.x / this.totalCols * 100
-    const topPct = cell.y / this.totalRows * 100
-    const widthPct = cell.w / this.totalCols * 100
-    const heightPct = cell.h / this.totalRows * 100
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+  // *.O             update / animations / transitions                       *.O
+  // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
-    nn.create('div')
-      .css({
-        left: `${leftPct}%`,
-        top: `${topPct}%`,
-        width: `${widthPct}%`,
-        height: `${heightPct}%`,
-        backgroundColor: color
-      })
-      .addTo('.grid')
-  }
-
-  animateToGrid () {
-    const newGrid = this.currentGrid === this.grids[0]
-      ? this.grids[1]
-      : this.grids[0]
-
-    const blocks = nn.getAll(this.ele)
-    const start = window.performance.now()
-    // capture each block’s initial %-values
-    const initial = blocks.map(block => ({
-      left: parseFloat(block.style.left),
-      top: parseFloat(block.style.top),
-      width: parseFloat(block.style.width),
-      height: parseFloat(block.style.height)
-    }))
-    // compute target %-values
-    const targets = newGrid.map(cell => ({
-      left: cell.x / this.totalCols * 100,
-      top: cell.y / this.totalRows * 100,
-      width: cell.w / this.totalCols * 100,
-      height: cell.h / this.totalRows * 100
-    }))
-    const duration = 800
-    const easeFn = t => nn.ease('OutCubic', t)
-
-    function update (now) {
-      const elapsed = now - start
-      const t = Math.min(1, elapsed / duration)
-      const eased = easeFn(t)
-
-      blocks.forEach((block, i) => {
-        const init = initial[i]
-        const target = targets[i]
-        // interpolate and apply
-        block.css({
-          left: `${nn.lerp(init.left, target.left, eased)}%`,
-          top: `${nn.lerp(init.top, target.top, eased)}%`,
-          width: `${nn.lerp(init.width, target.width, eased)}%`,
-          height: `${nn.lerp(init.height, target.height, eased)}%`
-        })
-      })
-
-      if (t < 1) window.requestAnimationFrame(update)
+  transitionTo (newGrid) {
+    if (!(newGrid instanceof Array)) {
+      console.error('animateToGrid() expects an array of grid blocks')
+      return
+    } else if (newGrid.length !== this.grid.length) {
+      console.error(`animateToGrid() new grid length (${newGrid.length}) mus match current grid length (${this.grid.length})`)
+      return
     }
 
-    window.requestAnimationFrame(update)
-    this.currentGrid = newGrid
+    nn.getAll(`${this.ele} > div`).forEach((block, i) => {
+      const newBlock = newGrid[i]
+      block.css({
+        left: newBlock.x / this.totalCols * 100 + '%',
+        top: newBlock.y / this.totalRows * 100 + '%',
+        width: newBlock.w / this.totalCols * 100 + '%',
+        height: newBlock.h / this.totalRows * 100 + '%'
+      })
+    })
+    this.grid = newGrid
+  }
+
+  clearBlock (block, fade) {
+    const div = typeof block === 'number' ? this.getBlock(block) : block
+    const children = Array.from(div.children)
+    if (fade) {
+      children.forEach(child => {
+        child.style.transition = typeof fade === 'number'
+          ? `opacity ${fade}s` : typeof fade === 'boolean'
+            ? 'opacity 0.3s' : typeof fade === 'string'
+              ? fade : 'opacity 0.3s'
+
+        child.style.opacity = '0'
+        const onEnd = () => {
+          child.removeEventListener('transitionend', onEnd)
+          child.parentNode && child.parentNode.removeChild(child)
+          console.log('removed', child);
+        }
+        child.addEventListener('transitionend', onEnd)
+      })
+    } else children.forEach(child => div.removeChild(child))
+  }
+
+  // _confirmClear (fade) {
+  //   // HACK: sometimes "clearAllBlocks" leaves elements behind
+  //   // ...this clears anything left over
+  //   let delay
+  //   if (typeof fade === 'string') {
+  //     const match = fade.match(/opacity\s+(\d*\.?\d+)(ms|s)\b/)
+  //     if (!match) delay = 300
+  //     else {
+  //       const [, value, unit] = match
+  //       if (unit === 's') delay = parseFloat(value) * 1000
+  //       else if (unit === 'ms') delay = parseFloat(value)
+  //     }
+  //   } else if (typeof fade === 'number') {
+  //     delay = fade * 1000
+  //   } else if (typeof fade === 'boolean') {
+  //     delay = 300
+  //   } else {
+  //     delay = 100
+  //   }
+  //   setTimeout(() => {
+  //     nn.getAll(`${this.ele} > div`).forEach(block => {
+  //       if (block.querySelector('*')) {
+  //         block.querySelectorAll('*').forEach(e => e.remove())
+  //       }
+  //     })
+  //   }, delay)
+  // }
+
+  clearAllBlocks (fade = false) {
+    nn.getAll(`${this.ele} > div`).forEach(div => this.clearBlock(div, fade))
+    // this._confirmClear(fade)
+  }
+
+  updateBlock (block, content, fade) { // TODO: still working on this
+    const div = typeof block === 'number' ? this.getBlock(block) : block
+    this.clearBlock(block, fade)
+    div.appendChild(content)
   }
 
   updateColors () {
     this.placed = []
-    const grid = this.currentGrid
-    // grab each block div instead of the container
+    const grid = this.grid
     const blocks = nn.getAll(`${this.ele} > div`)
     let idx = 0
-
     for (let i = 0; i < grid.length; i += 2) {
       const cellA = grid[i]
       const cellB = grid[i + 1]

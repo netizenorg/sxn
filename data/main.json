@@ -1,0 +1,23 @@
+{
+  "initiatives": [
+    "netnet.json",
+    "bias-out-of-the-box.json",
+    "browserfest.json",
+    "dream.json",
+    "internet-walking-tour.json"
+  ],
+  "copy": {
+    "about": {
+      "main": "netizen.org propels curious citizens of the ‘net beyond problematic defaults towards a more creative, playful, and equitable digital world. We are a collective of new media artists, educators, and activists on a mission to reestablish human agency in the information age through public lectures, workshops, digital tools, online events, and festivals.",
+      "sub": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
+    },
+    "initiatives": {
+      "main": "At netizen.org, our goal is to transform “users” into “netizens” (citizens of the Internet) who are critically engaged with the digital technologies that make up our networked environment. While the projects featured here vary in their format, from interactive online platforms to participatory in-person events, they all share a commitment to this central mission: empowering individuals to understand, question, and creatively shape the digital world.",
+      "sub": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
+    },
+    "support": {
+      "main": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "sub": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
+    }
+  }
+}

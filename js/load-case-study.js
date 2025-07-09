@@ -1,0 +1,130 @@
+/* global nn, content, resetGridAndContent, grid, bendPanel, NetizenGrid, addSyrupImgToGrid */
+const csDisplay = (o, k) => `style="display: ${o[k] ? 'inline-block' : 'none'};"`
+const csOpacity = (o, k) => `style="opacity: ${o[k] ? 1 : 0};"`
+
+window.loadCaseStudy = function (o, span) {
+  nn.getAll('.sub-nav span').forEach(s => s.classList.remove('selected'))
+  span.classList.add('selected')
+
+  // update main content area
+  content.transitionTo([{ x: 0, w: 2 }, { x: 2, w: 4 }, { x: 6, w: 0 }])
+  nn.get('.cell-content.visible').parentNode
+    .css({ background: 'var(--prim-a)', color: 'var(--prim-b)' })
+  nn.get('.cell-content.visible').innerHTML = `
+    <section class="case-study">
+      <div>
+        <h2>${o.title}</h2>
+        <span class="bold-blue" ${csDisplay(o, 'sub-title')}>${o['sub-title']}</span>
+        ${o.content.map(c => `<p>${c}</p>`).join('\n')}
+      </div>
+      <div>
+        <small>
+          <small class="bold-blue">Date</small>
+          <br>${o.date}
+        </small>
+        <small ${csDisplay(o, 'partners')}>
+          <small class="bold-blue">Partners</small><br>
+          ${o.partners.map(p => p).join('<br>')}
+        </small>
+        <small  ${csDisplay(o, 'urls')}>
+          <small class="bold-blue">Links</small><br>
+          ${Object.entries(o.urls).map(o => `<a href="${o[1]}" target="_blank">${o[0]}</a>`).join('<br>')}
+        </small>
+      </div>
+    </section>
+  `
+  content.adjustHeight()
+
+  // clear previous grids
+  resetGridAndContent(true)
+
+  const grids = [grid]
+  const cases = nn.shuffle(window.data.initiatives[o.name].grid)
+  const gridNames = Object.keys(window.grids)
+
+  // create enough grids for all the syrup images
+  let gid = 3 // index of "extra"
+  let openCells = window.openCells.initiatives.length
+  while (openCells < cases.length) {
+    const type = gridNames[gid % gridNames.length]
+    const layout = window.grids[type]
+    const attr = { class: 'grid', id: 'g' + gid, name: type }
+    nn.create('div').set(attr).addTo('main')
+    grids.push(new NetizenGrid({ selector: '#g' + gid, grid: layout }))
+    openCells += window.openCells[type].length
+    gid++
+  }
+
+  // popualte grid with syrup images
+  let c = 0
+  nn.getAll('.grid').forEach((gridEle, i) => {
+    const name = gridEle.getAttribute('name') || 'initiatives'
+    const targetCells = window.openCells[name]
+    const gridInstance = grids[i]
+    targetCells.forEach(targ => {
+      const ele1 = gridInstance.getBlock(targ)
+      const targ2 = (targ - 1) % 2 === 0 ? targ + 1 : targ - 1
+      const ele2 = gridInstance.getBlock(targ2)
+      const obj = cases[c]
+      if (obj) {
+        // POP UP SCREEN (funcion runs on click)
+        const callback = () => {
+          document.body.classList.add('no-scroll')
+          const cs = nn
+            .create('div')
+            .set('class', 'case-study-detail')
+            .css({
+              background: nn.random(window.colors[0]),
+              filter: bendPanel._buildFilterString(bendPanel.filters) || 'none'
+            })
+            .addTo('body')
+          cs.innerHTML = `
+            <div class="title-bar">
+              <h2 ${csOpacity(obj, 'title')}>${obj.title}</h2>
+              <span class="close">×</span>
+            </div>
+            <img src="${obj.image}" alt="${obj.alt}">
+            <div class="info-bar">
+              <div>
+                <small ${csDisplay(obj, 'credit')} class="bold">Credit:</small>
+                <small ${csDisplay(obj, 'credit')}> ${obj.credit}</small>
+              </div>
+              <small ${csOpacity(obj, 'urls')}>
+                <small class="bold">Links:</small>
+                 ${obj.urls ? Object.entries(obj.urls).map(o => `<a href="${o[1]}" target="_blank">${o[0]}</a>`).join(', ') : ''}
+              </small>
+            </div>
+            <div class="content">
+              ${obj.content ? obj.content.map(p => `<p>${p}</p>`).join('') : ''}
+              <br>
+              <small ${csDisplay(obj, 'alt')} class="bold">Media Caption:</small>
+              <small ${csDisplay(obj, 'alt')}>${obj.alt}</small>
+              <br>
+            </div>
+          `
+          setTimeout(() => cs.css('opacity', 1), 100)
+          cs.querySelector('.close').addEventListener('click', () => {
+            document.body.classList.remove('no-scroll')
+            cs.css('opacity', 0)
+            setTimeout(() => cs.remove(), 800)
+          })
+        }
+        // add content to grid
+        addSyrupImgToGrid({ path: obj.image, ele1, ele2, callback })
+
+        if (obj.title) {
+          nn.create('h3')
+            .content(obj.title)
+            .set('class', 'case-study-thumb-title')
+            .addTo(ele1)
+        }
+      }
+      c++
+    })
+  })
+
+  // relocate footer at bottom
+  const footer = nn.get('footer')
+  footer.remove()
+  footer.addTo('main')
+}

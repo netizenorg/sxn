@@ -23,6 +23,10 @@
         left: 50px;
         top: 50px;
       }
+
+      .grid > div {
+        transition: none;
+      }
     </style>
   </head>
   <body>
@@ -44,7 +48,14 @@
         randomize: true,
         rate: 1,
         lastRandomize: 0,
-        newColors: () => grid.updateColors(),
+        newColors: () => {
+          grid.updateColors()
+          const colors = [
+            grid.getBlock(1).style.backgroundColor,
+            grid.getBlock(2).style.backgroundColor
+          ]
+          syrup.update({ colors })
+        },
         rando: () => updateSyrup(),
         layers: {
           pixelate: true,
@@ -73,23 +84,20 @@
       l.open()
 
       const grid = new NetizenGrid({
-        ele: '.grid',
-        grids: [
-          [
-            { x: 0, y: 0, w: 3, h: 2 },
-            { x: 0, y: 2, w: 3, h: 1 }
-          ],
-          [
-            { x: 0, y: 0, w: 3, h: 1 },
-            { x: 0, y: 1, w: 3, h: 2 },
-          ]
+        selector: '.grid',
+        grid: [
+          { x: 0, y: 0, w: 3, h: 2 },
+          { x: 0, y: 2, w: 3, h: 1 }
         ]
       })
 
       const syrup = new NetizenSyrupImage({
         image: 'videos/first_frame.jpg',
-        parent: '.grid div:nth-child(1)',
-        second: '.grid div:nth-child(2)'
+        ele: grid.getBlock(1),
+        color: [
+          grid.getBlock(1).style.backgroundColor,
+          grid.getBlock(2).style.backgroundColor
+        ]
       })
 
       async function grabFrame () {
@@ -124,7 +132,7 @@
           }
 
           syrup._image = img
-          syrup.update(img)
+          syrup.update()
         } catch (err) {
           console.error('Failed to grab frame:', err)
         }
