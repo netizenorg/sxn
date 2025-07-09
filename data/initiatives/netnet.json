@@ -12,22 +12,22 @@
   ],
   "grid": [
     {
-      "image": "/images/netnet/netnet1.jpg",
+      "image": "images/netnet/netnet1.jpg",
       "alt": "A translucent pink-and-purple laptop floats against a soft blue gradient, on it's screen we see one of netnet's interactive tutorials paused on a frame which includes three overlapping windows, a video player with Nick Briz explaining the work of early influential net.artists, another video titled “Mendi + Keith Obadike” and an old-school eBay page listing “Blackness For Sale”.",
       "credit": "Video and Screenshot by Nick Briz"
     },
     {
-      "image": "/images/netnet/netnet2.jpg",
+      "image": "images/netnet/netnet2.jpg",
       "alt": "A translucent pink-and-purple laptop floats against a soft blue gradient, on it's screen we see one of netnet's interactive tutorials paused on a frame which features a neon-green, terminal-style ASCII diagram, the work wwwwwwwww.jodi.org also known as the \"misconfigured ascii drawing\". Over the ASCII there are two windows, the first with Nick Briz explaining this influential work and the other is netnet's code editor feautring the code behind this net.art piece.",
       "credit": "Video and Screenshot by Nick Briz"
     },
     {
-      "image": "/images/netnet/netnet3.jpg",
+      "image": "images/netnet/netnet3.jpg",
       "alt": "A translucent pink-and-purple laptop floats against a soft blue gradient, its screen split vertically: the left half shows dark-mode CSS code, the right a bright green canvas dotted with a column of multicolored pixel discs. A floating “Color Widget” dialog hovers on the right, displaying hue, saturation, and brightness sliders and a live pie-chart preview of the selected green.",
       "credit": "Video and Screenshot by Nick Briz"
     },
     {
-      "image": "/images/netnet/netnet4.jpg",
+      "image": "images/netnet/netnet4.jpg",
       "alt": "A translucent pink-and-purple laptop floats against a soft blue gradient, its screen’s bright green workspace hosts a curved chain of neon pixel-art discs. A small dark code editor window sits in the lower left, showing CSS keyframe rules for animating the discs’ spin effect.",
       "credit": "Video and Screenshot by Nick Briz"
     }

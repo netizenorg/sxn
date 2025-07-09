@@ -14,37 +14,37 @@
   ],
   "grid": [
     {
-      "image": "/images/dream/dream1.jpg",
+      "image": "images/dream/dream1.jpg",
       "alt": "A hand belonging to the photographer, Kim Kovacik, holds a D.R.E.A.M. event flyer in sharp focus, with a blurred audience seated before a projector screen in a warm, exposed-brick loft space.",
       "credit": "Photograh by Kim Kovacik"
     },
     {
-      "image": "/images/dream/dream2.jpg",
+      "image": "images/dream/dream2.jpg",
       "alt": "Side view of D.R.E.A.M. attendees seated in cicular rows of chairs, some leaning forward, others relaxed, listening intently in an industrial-style meeting room.",
       "credit": "Photograph by Kim Kovacik"
     },
     {
-      "image": "/images/dream/dream3.jpg",
+      "image": "images/dream/dream3.jpg",
       "alt": "The speaker, Tara Vancil, in a black tee gestures with painted red nails as she speaks, flanked by two moderators, Jon Satrom and Nick Briz, against a brick wall and speaker setup.",
       "credit": "Photograph by Kim Kovacik"
     },
     {
-      "image": "/images/dream/dream7.jpg",
+      "image": "images/dream/dream7.jpg",
       "alt": "Audience members including a note-taking woman in a blue jacket and a pensive man with a durag lean in from their chairs during the discussion.",
       "credit": "Photograph by Kim Kovacik"
     },
     {
-      "image": "/images/dream/dream9.jpg",
+      "image": "images/dream/dream9.jpg",
       "alt": "Close-up of hands of an audience memeber sketching a laptop illustration and jotting bullet-point notes in a notebook, with out-of-focus chairs and attendees behind.",
       "credit": "Photograph by Kim Kovacik"
     },
     {
-      "image": "/images/dream/dream12.jpg",
+      "image": "images/dream/dream12.jpg",
       "alt": "Wide shot of a packed loft venue: the speaker, Janice Gates, is seated beteen the two moderators, Nick Briz and Jon Satrom, beneath sponsor banners and a projected slide titled ‘How Detroit Residents Built Their Own Internet,’ facing an engaged audience.",
       "credit": "Photograph by Kim Kovacik"
     },
     {
-      "image": "/images/dream/becca.jpg",
+      "image": "images/dream/becca.jpg",
       "title": "Recasting Digital Shadows w/ Becca Ricks",
       "date": "2018.11.29",
       "urls": {
@@ -58,7 +58,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/tara.jpg",
+      "image": "images/dream/tara.jpg",
       "title": "Decentralizing the Web w/ Tara Vancil",
       "date": "2019.01.31",
       "urls": {
@@ -73,7 +73,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/melody.jpg",
+      "image": "images/dream/melody.jpg",
       "title": "Zombie Data: Stories told by Discarded Devices w/ Melody Haase",
       "date": "2019.02.28",
       "urls": {
@@ -88,7 +88,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/brannon.jpg",
+      "image": "images/dream/brannon.jpg",
       "title": "Exploring the Invisible Commons with Brannon Dorsey",
       "urls": {
         "video": "https://www.youtube.com/watch?v=bjt9_oQC9jM&list=PLnRGhgZaGeBssPV4cFfvbgk50lgc-9dUp&index=6"
@@ -101,7 +101,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/margaret.jpg",
+      "image": "images/dream/margaret.jpg",
       "title": "Debugging Bias in AI w/ Margaret Mitchell",
       "date": "2019.04.25",
       "urls": {
@@ -116,7 +116,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/janice.jpg",
+      "image": "images/dream/janice.jpg",
       "title": "How Detroit Residents Built Their Own Internet w/ Janice Gates",
       "date": "2019.05.30",
       "urls": {
@@ -131,7 +131,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/harlo.jpg",
+      "image": "images/dream/harlo.jpg",
       "title": "Journalism, Activism, & the Surveillance State w/ Harlo Holmes",
       "date": "2018.12.13",
       "urls": {
@@ -146,7 +146,7 @@
       "credit": "Videographer Jon Satrom"
     },
     {
-      "image": "/images/dream/ingrid.jpg",
+      "image": "images/dream/ingrid.jpg",
       "title": "Seeing the Internet w/ Ingrid Burrington",
       "date": "2015.11.04",
       "urls": {
