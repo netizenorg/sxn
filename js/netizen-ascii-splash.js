@@ -189,7 +189,8 @@ class NetizenASCIISplash {
         const px = Math.floor(col * fs + fs / 2)
         const py = Math.floor(row * fs + fs / 2)
         const idx = (py * cw + px) * 4
-        const avg = (data[idx] + data[idx + 1] + data[idx + 2]) / 3
+        let avg = (data[idx] + data[idx + 1] + data[idx + 2]) / 3
+        if (this.bgColor === 'white') avg = 255 - avg
         const ci = Math.floor((avg / 255) * (chars.length - 1))
         const glyph = chars.charAt(chars.length - 1 - ci)
         this.ctx.fillText(glyph, col * fs, row * fs)
