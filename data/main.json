@@ -6,6 +6,14 @@
     "dream.json",
     "internet-walking-tour.json"
   ],
+  "splashImages": [
+    "images/walking-tour/netwalkingtour4.jpg",
+    "images/walking-tour/netwalkingtour3.jpg",
+    "images/netnet/netnet1.jpg",
+    "images/netnet/netnet4.jpg",
+    "images/dream/dream2.jpg",
+    "images/dream/dream12.jpg"
+  ],
   "copy": {
     "about": {
       "main": "netizen.org propels curious citizens of the ‘net beyond problematic defaults towards a more creative, playful, and equitable digital world. We are a collective of new media artists, educators, and activists on a mission to reestablish human agency in the information age through public lectures, workshops, digital tools, online events, and festivals.",

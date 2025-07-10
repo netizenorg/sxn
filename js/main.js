@@ -306,14 +306,7 @@ async function main () {
     ele: nn.get('#splash-canvas'),
     radius: 200,
     duration: 1000,
-    images: nn.shuffle([
-      'images/walking-tour/netwalkingtour4.jpg',
-      'images/walking-tour/netwalkingtour3.jpg',
-      'images/netnet/netnet1.jpg',
-      'images/netnet/netnet4.jpg',
-      'images/dream/dream2.jpg',
-      'images/dream/dream12.jpg'
-    ])
+    images: nn.shuffle(window.data.splashImages)
   })
 
   // setup content section (displays over the splash + above the grid)
