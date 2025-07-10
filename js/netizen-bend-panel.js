@@ -204,6 +204,7 @@ class NetizenBendPanel {
     this.ne = new Netitor({
       ele: '#editor',
       theme: 'sonnenzimmer',
+      hint: false,
       language: 'css',
       code: this.getCode()
     })

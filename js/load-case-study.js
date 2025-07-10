@@ -2,7 +2,10 @@
 const csDisplay = (o, k) => `style="display: ${o[k] ? 'inline-block' : 'none'};"`
 const csOpacity = (o, k) => `style="opacity: ${o[k] ? 1 : 0};"`
 
-window.loadCaseStudy = function (o, span) {
+window.loadCaseStudy = function (o) {
+  const span = nn.getAll('.sub-nav span')
+    .filter(ele => ele.getAttribute('name') === o.name)[0]
+
   nn.getAll('.sub-nav span').forEach(s => s.classList.remove('selected'))
   span.classList.add('selected')
 
@@ -41,10 +44,12 @@ window.loadCaseStudy = function (o, span) {
   const grids = [grid]
   const cases = nn.shuffle(window.data.initiatives[o.name].grid)
   const gridNames = Object.keys(window.grids)
+  // NOTE: this should match the initial gird type set in showInitiatives()
+  const initialGrid = 'bendPanel'
 
   // create enough grids for all the syrup images
   let gid = 3 // index of "extra"
-  let openCells = window.openCells.initiatives.length
+  let openCells = window.openCells[initialGrid].length
   while (openCells < cases.length) {
     const type = gridNames[gid % gridNames.length]
     const layout = window.grids[type]
@@ -58,7 +63,7 @@ window.loadCaseStudy = function (o, span) {
   // popualte grid with syrup images
   let c = 0
   nn.getAll('.grid').forEach((gridEle, i) => {
-    const name = gridEle.getAttribute('name') || 'initiatives'
+    const name = gridEle.getAttribute('name') || initialGrid
     const targetCells = window.openCells[name]
     const gridInstance = grids[i]
     targetCells.forEach(targ => {

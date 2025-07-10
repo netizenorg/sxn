@@ -193,6 +193,10 @@ blockquote:before {
   transition: opacity 0.8s var(--out-cubic);
 }
 
+#loader > img {
+  max-width: 60%;
+}
+
 #netizen-logo {
   position: fixed;
   top: 20px;

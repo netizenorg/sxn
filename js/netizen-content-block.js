@@ -33,6 +33,7 @@ class NetizenContentBlock {
       this.ele.style.height = `calc(${v.height}px + var(--lh-title) * 2)`
     } else {
       this.ele.style.height = 'var(--splash-height)'
+      this.ele.style.left = `${window.innerWidth}px`
     }
   }
 

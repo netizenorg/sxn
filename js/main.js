@@ -195,7 +195,7 @@ function showAbout () {
 }
 
 // --------------------------------------------------------- INITIATIVES SECTION
-function showInitiatives () {
+async function showInitiatives () {
   if (nav.state === 'initiatives') return
   content.show('initiatives')
 
@@ -209,12 +209,30 @@ function showInitiatives () {
     const item = nn.create('span')
       .content(obj.title)
       .set('class', 'sub-nav-item')
+      .set('name', key)
       .addTo(subNav)
-      .on('click', () => window.loadCaseStudy(obj, item))
+      .on('click', () => window.loadCaseStudy(obj))
     setTimeout(() => { item.style.opacity = 1 }, 900)
   })
 
-  grid.transitionTo(window.grids.initiatives)
+  grid.transitionTo(window.grids.bendPanel)
+
+  const dreamPics = [1, 2, 3, 7, 9, 12]
+  const dreamObj = window.data.initiatives.dream
+  addSyrupImgToGrid({
+    path: `images/dream/dream${nn.random(dreamPics)}.jpg`,
+    ele1: grid.getBlock(3),
+    ele2: grid.getBlock(4),
+    callback: () => window.loadCaseStudy(dreamObj)
+  })
+
+  const ascii = await loadASCIIArt({
+    path: 'ascii-art/netnet.txt',
+    parent: grid.getBlock(1),
+    css: { fontSize: '2rem', cursor: 'pointer' }
+  })
+  const nnObj = window.data.initiatives.netnet
+  ascii.onclick = () => window.loadCaseStudy(nnObj)
 }
 
 // ------------------------------------------------------------- SUPPORT SECTION
@@ -237,6 +255,23 @@ function showSupport () {
 // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 // *.O                             main function                           *.O
 // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+
+function resize () {
+  if (window.blockerTimer) {
+    clearTimeout(window.blockerTimer)
+    clearTimeout(window.killLoader)
+  }
+
+  nn.get('#loader').css('display', 'flex')
+  nn.get('#loader').css('opacity', 1)
+
+  content.adjustHeight()
+
+  window.blockerTimer = setTimeout(() => {
+    nn.get('#loader').css('opacity', 0)
+    window.killLoader = setTimeout(() => nn.get('#loader').css('display', 'none'), 800)
+  }, 250)
+}
 
 async function main () {
   // load initial data
@@ -340,3 +375,4 @@ async function main () {
 }
 
 nn.on('load', main)
+nn.on('resize', resize)
