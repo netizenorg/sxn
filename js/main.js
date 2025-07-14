@@ -121,12 +121,19 @@ function addSyrupImgToGrid (opts = {}) {
     .set('name', 'clean')
     .addTo(opts.ele1)
 
+  const fadeIn = e => { e.style.opacity = 1 }
+  const fadeOut = e => { e.style.opacity = 0 }
+
   opts.ele1.onmouseover = () => {
+    opts.ele1.querySelectorAll('.syrup-pre').forEach(fadeOut)
+    opts.ele1.querySelectorAll('.syrup-post').forEach(fadeIn)
     opts.ele1.querySelectorAll('img').forEach(img => {
       if (img.name !== 'clean') img.style.opacity = 0
     })
   }
   opts.ele1.onmouseout = () => {
+    opts.ele1.querySelectorAll('.syrup-pre').forEach(fadeIn)
+    opts.ele1.querySelectorAll('.syrup-post').forEach(fadeOut)
     opts.ele1.querySelectorAll('img').forEach(img => {
       if (img.name !== 'clean') {
         img.style.opacity = syrup[img.name].opacity
@@ -207,6 +214,7 @@ async function showInitiatives () {
     const key = proj.split('.')[0]
     const obj = window.data.initiatives[key]
     const item = nn.create('span')
+    // const item = nn.create('h2')
       .content(obj.title)
       .set('class', 'sub-nav-item')
       .set('name', key)
@@ -321,7 +329,8 @@ async function main () {
   // setup bend panel
   await document.fonts.load('200px Fira Mono')
   bendPanel = new NetizenBendPanel({
-    ele: grid.getBlock(1),
+    textEle: grid.getBlock(1),
+    panelEle: '.grid div:nth-child(3)', // 'main',
     onShow: () => {
       const t = nn.get('.grid').top + window.pageYOffset - nn.get('header').height
       window.scrollTo({ top: t, behavior: 'smooth' })

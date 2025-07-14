@@ -4,10 +4,11 @@ class NetizenBendPanel {
     this.showing = false // displaying the bend panel itself
 
     // parent for the clickable canvas text
-    this.parent = opts.ele
+    this.textEle = opts.textEle
+    this.panelEle = opts.panelEle
 
     this.text = new NetizenBentText({
-      parent: opts.ele,
+      parent: this.textEle,
       text: ['BEND', 'THIS', 'SITE'],
       color: nn.get('.grid div:nth-child(2)').style.backgroundColor,
       padding: 10,
@@ -20,7 +21,7 @@ class NetizenBendPanel {
     this.text.canvas.onclick = () => this.togglePanel()
 
     // element for the bend panel itself
-    this.panel = nn.create('div').set('class', 'bend-panel').addTo('main')
+    this.panel = nn.create('div').set('class', 'bend-panel').addTo(this.panelEle)
     this.panel.innerHTML = `
       <div class="options">
         <div class="row">
@@ -33,7 +34,6 @@ class NetizenBendPanel {
 
     this._setupOptions()
     this._setupEditor()
-
     this.panel.remove()
 
     this.onShow = opts.onShow
@@ -52,8 +52,8 @@ class NetizenBendPanel {
 
   enable () {
     // if it's been removed, add it back in
-    if (this.parent.children.length === 0) {
-      this.parent.appendChild(this.text.canvas)
+    if (this.textEle.children.length === 0) {
+      this.textEle.appendChild(this.text.canvas)
     }
 
     if (this.text.canvas.style.display === 'block' &&
@@ -81,7 +81,7 @@ class NetizenBendPanel {
     if (typeof this.onShow === 'function') this.onShow()
     this.panel.css('display', 'block')
     setTimeout(() => this.panel.css('opacity', 1), 100)
-    this.panel.addTo('.grid div:nth-child(3)')
+    this.panel.addTo(this.panelEle)
     setTimeout(() => { this.ne.code = this.getCode() }, 800)
     this.showing = true
   }

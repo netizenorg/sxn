@@ -2,7 +2,7 @@
   --prim-a: #fff;
   --prim-b: #000;
   --blue: #0000ff;
-  --hs: 7.5em; /* header height size */
+  --hs: 7.5rem; /* header height size */
   --r: 5vw; /* radius for borders */
 
   /* word‐spacing: 20px → 1.25rem (assuming 16px base) */
@@ -12,11 +12,11 @@
   --fs-title: 2.5rem;    /* 40px */
   --lh-title: 2.25rem;   /* 36px */
 
-  --fs-subtitle: 2rem;   /* 32px */
-  --lh-subtitle: 1.875rem; /* 30px */
+  --fs-heading: 2rem;   /* 32px */
+  --lh-heading: 1.875rem; /* 30px */
 
-  --fs-heading: 1.5rem;  /* 24px */
-  --lh-heading: 1.625rem; /* 26px */
+  --fs-subtitle: 1.5rem;  /* 24px */
+  --lh-subtitle: 1.625rem; /* 26px */
 
   --fs-body-web: 1.3125rem; /* 21px */
   --lh-body-web: 1.575rem;    /* 120% */
@@ -61,6 +61,7 @@ body {
   overflow-x: hidden;
 
   font-family: 'Zen Maru Gothic', serif;
+  /* font-family: 'Fira Mono', monospace; */
   background-color: var(--prim-b);
   /* font-weight: 300; */
 }
@@ -74,15 +75,16 @@ h1 {
 
 /* Subtitle (e.g. second-level headings) */
 h2 {
-  font-size: var(--fs-subtitle);
-  line-height: var(--lh-subtitle);
+  font-size: var(--fs-heading);
+  line-height: var(--lh-heading);
   /* word-spacing: var(--ws); */
 }
 
 /* Section headings (e.g. third-level) */
 h3 {
-  font-size: var(--fs-heading);
-  line-height: var(--lh-heading);
+  font-size: var(--fs-subtitle);
+  line-height: var(--lh-subtitle);
+  margin-top: 0;
   /* word-spacing: var(--ws); */
 }
 
@@ -327,6 +329,7 @@ header .burger {
   opacity: 0;
   color: var(--prim-a);
   display: block;
+  margin: 0;
 
   padding: 0.2em 0 0.2em 0.7em;
   border-radius: 2em 0 0 2em;
@@ -349,6 +352,11 @@ header .burger {
 
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
 /*                                                    initatives case-study  */
+
+
+#content .case-study {
+ /* NOTE: might change to 3 column layout */
+}
 
 #content .case-study > div:nth-child(1) {
   max-width: 42rem;
@@ -379,12 +387,18 @@ header .burger {
   z-index: 10;
   padding: var(--lh-title);
   margin: 0;
+  transition: opacity 0.8s var(--out-cubic);
 }
 
-.case-study-thumb-title:hover {
-  color: var(--prim-a);
+.case-study-thumb-caption {
+  position: absolute;
+  bottom: 0;
+  padding: 1rem;
+  margin: 1rem;
   background: var(--prim-b);
-  cursor: pointer;
+  color: var(--prim-a);
+  font-family: "Fira Mono", monospace;
+  opacity: 0;
 }
 
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
@@ -668,9 +682,14 @@ footer {
 
   width: 100vw;
   padding: 1em 2em;
+  height: 133px;
 
   color: var(--prim-a);
   background-color: var(--prim-b);
+}
+
+footer img[src="images/word-mark-tag-line-white.svg"] {
+  width: 186px;
 }
 
 .wordmark {

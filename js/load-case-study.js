@@ -3,10 +3,10 @@ const csDisplay = (o, k) => `style="display: ${o[k] ? 'inline-block' : 'none'};"
 const csOpacity = (o, k) => `style="opacity: ${o[k] ? 1 : 0};"`
 
 window.loadCaseStudy = function (o) {
-  const span = nn.getAll('.sub-nav span')
+  const span = nn.getAll('.sub-nav-item')
     .filter(ele => ele.getAttribute('name') === o.name)[0]
 
-  nn.getAll('.sub-nav span').forEach(s => s.classList.remove('selected'))
+  nn.getAll('.sub-nav-item').forEach(s => s.classList.remove('selected'))
   span.classList.add('selected')
 
   // update main content area
@@ -17,7 +17,7 @@ window.loadCaseStudy = function (o) {
     <section class="case-study">
       <div>
         <h2>${o.title}</h2>
-        <span class="bold-blue" ${csDisplay(o, 'sub-title')}>${o['sub-title']}</span>
+        <h3 class="bold-blue" ${csDisplay(o, 'sub-title')}>${o['sub-title']}</h3>
         ${o.content.map(c => `<p>${c}</p>`).join('\n')}
       </div>
       <div>
@@ -37,6 +37,9 @@ window.loadCaseStudy = function (o) {
     </section>
   `
   content.adjustHeight()
+
+  // NOTE HACK FOR NOW
+  updateCaseStudy()
 
   // clear previous grids
   resetGridAndContent(true)
@@ -117,10 +120,15 @@ window.loadCaseStudy = function (o) {
         // add content to grid
         addSyrupImgToGrid({ path: obj.image, ele1, ele2, callback })
 
+        nn.create('div')
+          .content(obj.alt)
+          .set('class', 'case-study-thumb-caption  syrup-post')
+          .addTo(ele1)
+
         if (obj.title) {
-          nn.create('h3')
+          nn.create('h2')
             .content(obj.title)
-            .set('class', 'case-study-thumb-title')
+            .set('class', 'case-study-thumb-title syrup-pre')
             .addTo(ele1)
         }
       }

@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <title>SxN Image Processing</title>
-    <link rel="stylesheet" href="css/fonts.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/fonts.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
       body {
         --size: 50px;
@@ -31,10 +31,10 @@
   </head>
   <body>
     <div class="grid"></div>
-    <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
-    <script src="js/dat.gui.min.js"></script>
-    <script src="js/netizen-syrup-image.js"></script>
-    <script src="js/netizen-grid.js"></script>
+    <script src="../js/nn.min.js"></script>
+    <script src="../js/dat.gui.min.js"></script>
+    <script src="../js/netizen-syrup-image.js"></script>
+    <script src="../js/netizen-grid.js"></script>
     <script>
 
       window.colors = [
@@ -98,8 +98,8 @@
       gui.add(settings, 'newColors').name('NEW COLOR SCHEME')
       gui.add(settings, 'randomize').name('RANDO (customized random)')
       gui.add(settings, 'image', images).onChange(() => {
-        clean.set('src', `images/dream/${settings.image}.jpg`)
-        syrup.updateImage(`images/dream/${settings.image}.jpg`)
+        clean.set('src', `../images/dream/${settings.image}.jpg`)
+        syrup.updateImage(`../images/dream/${settings.image}.jpg`)
       })
       // gui.add(settings, 'transition', 0, 1, 0.01).name('hover transition speed').onChange(() => {
       //   nn.get('.grid > div > img').css({ transition: `opacity ${settings.transition}s`})
@@ -188,7 +188,7 @@
       })
 
       const syrup = new NetizenSyrupImage({
-        image: 'images/dream/becca.jpg',
+        image: '../images/dream/becca.jpg',
         ele: grid.getBlock(1),
         colors: [
           grid.getBlock(1).style.backgroundColor,
@@ -201,7 +201,7 @@
       })
 
       const clean = nn.create('img')
-        .set('src', 'images/dream/becca.jpg')
+        .set('src', '../images/dream/becca.jpg')
         .set('name', 'clean')
         .addTo('.grid div:nth-child(1)')
 
