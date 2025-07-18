@@ -12,22 +12,27 @@
   --fs-title: 2.5rem;    /* 40px */
   --lh-title: 2.25rem;   /* 36px */
 
-  --fs-heading: 2rem;   /* 32px */
-  --lh-heading: 1.875rem; /* 30px */
+  --fs-heading: 1.49rem;   /* 32px */
+  --lh-heading: 1.27rem; /* 30px */
+  --ls-heading: 0.002rem;
 
-  --fs-subtitle: 1.5rem;  /* 24px */
-  --lh-subtitle: 1.625rem; /* 26px */
+  --fs-subtitle: 1.19rem;  /* 24px */
+  --lh-subtitle: 0.74rem; /* 26px */
+  --ls-subtitle: 0.003rem;
 
-  --fs-body-web: 1.3125rem; /* 21px */
+  --fs-body-web: 1.22rem; /* 21px */
   --lh-body-web: 1.575rem;    /* 120% */
-  --ws-body-web: 0.25rem;
+  --ls-body-web: 0.005rem;
+  --ws-body-web: 0rem;
 
   --fs-body-print: 0.8125rem; /* 13px */
   --lh-body-print: 1.125rem;  /* 18px */
 
   /* tertiary fluid size between 12–17px */
-  --fs-tertiary: clamp(0.75rem, 1vw, 1.0625rem);
-  --lh-tertiary: calc(clamp(0.75rem, 1vw, 1.0625rem) * 1.2);
+  /* --fs-tertiary: clamp(0.75rem, 1vw, 1.0625rem);
+  --lh-tertiary: calc(clamp(0.75rem, 1vw, 1.0625rem) * 1.2); */
+  --fs-tertiary: 0.83rem;
+  --lh-tertiary: 1.0625rem;
 
   /* NOTE: assuming ascii-splash is set to 16:9 */
   --splash-height: calc(100vw * 9/16 - var(--hs));
@@ -70,22 +75,21 @@ body {
 h1 {
   font-size: var(--fs-title);
   line-height: var(--lh-title);
-  /* word-spacing: var(--ws); */
 }
 
 /* Subtitle (e.g. second-level headings) */
 h2 {
   font-size: var(--fs-heading);
   line-height: var(--lh-heading);
-  /* word-spacing: var(--ws); */
+  letter-spacing: var(--ls-heading);
 }
 
 /* Section headings (e.g. third-level) */
 h3 {
   font-size: var(--fs-subtitle);
   line-height: var(--lh-subtitle);
+  letter-spacing: var(--ls-subtitle);
   margin-top: 0;
-  /* word-spacing: var(--ws); */
 }
 
 /* Body text on screen */
@@ -93,13 +97,15 @@ span, p {
   font-size: var(--fs-body-web);
   line-height: var(--lh-body-web);
   word-spacing: var(--ws-body-web);
+  letter-spacing: var(--ls-body-web);
+  margin: 0;
 }
 
 /* Tertiary text (e.g. captions, footnotes) */
 small {
+  font-family: "Fira Mono", monospace;
   font-size: var(--fs-tertiary);
   line-height: var(--lh-tertiary);
-  /* word-spacing: var(--ws); */
 }
 
 a {
@@ -136,11 +142,14 @@ blockquote:before {
 .prim-nav,
 .sec-nav {
   cursor: pointer;
-  border-radius: 2em;
+  user-select: none;
+  text-align: center;
+  display: inline-block;
   padding: 0.25em 1.3em 0.35em 1.3em;
   border: 1px solid transparent;
-  margin: 0 1em;
-  user-select: none;
+  border-radius: 2em;
+  margin: 0 0.15rem;
+  min-width: 8rem;
 }
 
 .prim-nav {
@@ -164,7 +173,7 @@ blockquote:before {
 
 .sec-nav:hover,
 .sec-nav.selected {
-  border: 1px solid var(--prim-b);
+  border: 1.25px solid var(--prim-b);
   background-color: var(--prim-a);
   color: var(--prim-b);
 }
@@ -201,10 +210,10 @@ blockquote:before {
 
 #netizen-logo {
   position: fixed;
-  top: 20px;
+  top: 15px;
   left: 23px;
   z-index: 110;
-  width: 139px;
+  width: 155px;
   cursor: pointer;
 }
 
@@ -321,8 +330,6 @@ header .burger {
 
 #content > div.sub-nav {
   padding-right: 0px;
-  /* background-color: var(--blue) !important; */
-  background-color: var(--prim-b) !important;
 }
 
 #content > div.sub-nav > .sub-nav-item {
@@ -337,6 +344,10 @@ header .burger {
   transition: opacity 0.4s var(--out-cubic);
 }
 
+#content > div.sub-nav > .sub-nav-item.invert{
+  color: var(--prim-b);
+}
+
 #content > div.sub-nav > .sub-nav-item:hover {
   background: var(--prim-a);
   color: var(--prim-b);
@@ -344,9 +355,14 @@ header .burger {
   font-weight: 600;
 }
 
+#content > div.sub-nav > .sub-nav-item.invert:hover {
+  background: var(--prim-b);
+  color: var(--prim-a);
+}
+
 #content > div.sub-nav > .sub-nav-item.selected {
-  background: var(--prim-a);
-  color: var(--prim-b);
+  background: var(--blue);
+  color: var(--prim-a);
   font-weight: 600;
 }
 
@@ -355,22 +371,49 @@ header .burger {
 
 
 #content .case-study {
- /* NOTE: might change to 3 column layout */
+  display: flex;
+  alignItems: self-start;
+}
+
+@media (max-width: 1486px) {
+  #content .case-study {
+    display: block;
+  }
 }
 
 #content .case-study > div:nth-child(1) {
-  max-width: 42rem;
+  max-width: 41rem;
 }
 
 #content .case-study > div:nth-child(2) {
-  margin-top: 100px;
+  margin-top: 0;
+  margin-left: 60px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: start;
   align-items: flex-start;
 }
 
+.case-study > div:nth-child(2) > small {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1486px) {
+  #content .case-study > div:nth-child(2) {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 100px;
+    margin-left: 0;
+    max-width: 41rem;
+  }
+
+  .case-study > div:nth-child(2) > small {
+    margin: 0 0.5rem;
+  }
+}
+
 #content .case-study h2 {
-  margin: 0 0 1rem 0;
+  margin: 3px 0 1rem 0;
 }
 
 #content .case-study .bold-blue {
@@ -388,16 +431,21 @@ header .burger {
   padding: var(--lh-title);
   margin: 0;
   transition: opacity 0.8s var(--out-cubic);
+  line-height: 1.75rem;
+  max-width: 35rem;
 }
 
 .case-study-thumb-caption {
   position: absolute;
   bottom: 0;
-  padding: 1rem;
+  padding: 0.6rem;
   margin: 1rem;
   background: var(--prim-b);
   color: var(--prim-a);
   font-family: "Fira Mono", monospace;
+  font-size: var(--fs-tertiary);
+  line-height: var(--lh-tertiary);
+  word-spacing: var(--ws);
   opacity: 0;
 }
 
@@ -677,12 +725,15 @@ header .burger {
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
 
 footer {
+  display: flex;
+  align-items: center;
+
   position: relative;
   top: var(--hs);
 
   width: 100vw;
   padding: 1em 2em;
-  height: 133px;
+  height: 150px;
 
   color: var(--prim-a);
   background-color: var(--prim-b);
@@ -694,4 +745,8 @@ footer img[src="images/word-mark-tag-line-white.svg"] {
 
 .wordmark {
   font-size: 2em;
+}
+
+.cm-s-netizen {
+  font-size: 0.1rem !important;
 }

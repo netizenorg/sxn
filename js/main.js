@@ -6,7 +6,7 @@ window.colors = [
 ]
 
 window.data = null // contains all the content data
-let nav, splash, content, grid, bendPanel
+let nav, splash, content, grid, bendPanel, subNav, subNavClr
 
 // default settings for processed images
 // TODO: make customizable via bend panel
@@ -95,7 +95,6 @@ function resetGridAndContent (exceptInitatives) {
 
   if (exceptInitatives) return
   // reset initatives
-  const subNav = content.ele.children[0]
   subNav.classList.remove('sub-nav')
   subNav.querySelectorAll('*').forEach(e => e.remove())
   // revert center cell-content to original colors
@@ -208,22 +207,22 @@ async function showInitiatives () {
 
   resetGridAndContent()
 
-  const subNav = content.ele.children[0]
   subNav.className = 'sub-nav'
+  let subClass = 'sub-nav-item'
+  if (nn.isLight(subNavClr)) subClass += ' invert'
   window.data._initativesOrder.forEach(proj => {
     const key = proj.split('.')[0]
     const obj = window.data.initiatives[key]
     const item = nn.create('span')
-    // const item = nn.create('h2')
       .content(obj.title)
-      .set('class', 'sub-nav-item')
+      .set('class', subClass)
       .set('name', key)
       .addTo(subNav)
       .on('click', () => window.loadCaseStudy(obj))
     setTimeout(() => { item.style.opacity = 1 }, 900)
   })
 
-  grid.transitionTo(window.grids.bendPanel)
+  grid.transitionTo(window.grids.default2)
 
   const dreamPics = [1, 2, 3, 7, 9, 12]
   const dreamObj = window.data.initiatives.dream
@@ -319,6 +318,9 @@ async function main () {
 
   // setup content section (displays over the splash + above the grid)
   content = new NetizenContentBlock()
+  subNav = content.ele.children[0]
+  subNav.className = 'sub-nav'
+  subNavClr = window.getComputedStyle(subNav).getPropertyValue('background-color')
 
   // setup main grid section
   grid = new NetizenGrid({
@@ -334,7 +336,7 @@ async function main () {
     onShow: () => {
       const t = nn.get('.grid').top + window.pageYOffset - nn.get('header').height
       window.scrollTo({ top: t, behavior: 'smooth' })
-      grid.transitionTo(window.grids.bendPanel)
+      grid.transitionTo(window.grids.default2)
       // remove the crew fromt the grid
       nn.getAll('.syrup').forEach(ele => {
         ele.classList.remove('syrup')

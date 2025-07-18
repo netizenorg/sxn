@@ -2,17 +2,7 @@
 const csDisplay = (o, k) => `style="display: ${o[k] ? 'inline-block' : 'none'};"`
 const csOpacity = (o, k) => `style="opacity: ${o[k] ? 1 : 0};"`
 
-window.loadCaseStudy = function (o) {
-  const span = nn.getAll('.sub-nav-item')
-    .filter(ele => ele.getAttribute('name') === o.name)[0]
-
-  nn.getAll('.sub-nav-item').forEach(s => s.classList.remove('selected'))
-  span.classList.add('selected')
-
-  // update main content area
-  content.transitionTo([{ x: 0, w: 2 }, { x: 2, w: 4 }, { x: 6, w: 0 }])
-  nn.get('.cell-content.visible').parentNode
-    .css({ background: 'var(--prim-a)', color: 'var(--prim-b)' })
+function caseStudyTemplate (o) {
   nn.get('.cell-content.visible').innerHTML = `
     <section class="case-study">
       <div>
@@ -36,10 +26,51 @@ window.loadCaseStudy = function (o) {
       </div>
     </section>
   `
-  content.adjustHeight()
+}
 
-  // NOTE HACK FOR NOW
-  updateCaseStudy()
+function popUpTemplate (cs, obj) {
+  cs.innerHTML = `
+    <div class="title-bar">
+      <h2 ${csOpacity(obj, 'title')}>${obj.title}</h2>
+      <span class="close">×</span>
+    </div>
+    <img src="${obj.image}" alt="${obj.alt}">
+    <div class="info-bar">
+      <div>
+        <small ${csDisplay(obj, 'credit')} class="bold">Credit:</small>
+        <small ${csDisplay(obj, 'credit')}> ${obj.credit}</small>
+      </div>
+      <small ${csOpacity(obj, 'urls')}>
+        <small class="bold">Links:</small>
+         ${obj.urls ? Object.entries(obj.urls).map(o => `<a href="${o[1]}" target="_blank">${o[0]}</a>`).join(', ') : ''}
+      </small>
+    </div>
+    <div class="content">
+      ${obj.content ? obj.content.map(p => `<p>${p}</p>`).join('') : ''}
+      <br>
+      <small ${csDisplay(obj, 'alt')} class="bold">Media Caption:</small>
+      <small ${csDisplay(obj, 'alt')}>${obj.alt}</small>
+      <br>
+    </div>
+  `
+}
+
+window.loadCaseStudy = function (o) {
+  const span = nn.getAll('.sub-nav-item')
+    .filter(ele => ele.getAttribute('name') === o.name)[0]
+
+  nn.getAll('.sub-nav-item').forEach(s => s.classList.remove('selected'))
+  span.classList.add('selected')
+
+  // update main content area
+  content.transitionTo([{ x: 0, w: 2 }, { x: 2, w: 4 }, { x: 6, w: 0 }])
+
+  nn.get('.cell-content.visible').parentNode
+    .css({ background: 'var(--prim-a)', color: 'var(--prim-b)' })
+
+  caseStudyTemplate(o)
+
+  content.adjustHeight()
 
   // clear previous grids
   resetGridAndContent(true)
@@ -47,8 +78,7 @@ window.loadCaseStudy = function (o) {
   const grids = [grid]
   const cases = nn.shuffle(window.data.initiatives[o.name].grid)
   const gridNames = Object.keys(window.grids)
-  // NOTE: this should match the initial gird type set in showInitiatives()
-  const initialGrid = 'bendPanel'
+  const initialGrid = 'default2' // NOTE: this grid type should match the one in showInitiatives()
 
   // create enough grids for all the syrup images
   let gid = 3 // index of "extra"
@@ -75,6 +105,7 @@ window.loadCaseStudy = function (o) {
       const ele2 = gridInstance.getBlock(targ2)
       const obj = cases[c]
       if (obj) {
+        // ......
         // POP UP SCREEN (funcion runs on click)
         const callback = () => {
           document.body.classList.add('no-scroll')
@@ -86,30 +117,9 @@ window.loadCaseStudy = function (o) {
               filter: bendPanel._buildFilterString(bendPanel.filters) || 'none'
             })
             .addTo('body')
-          cs.innerHTML = `
-            <div class="title-bar">
-              <h2 ${csOpacity(obj, 'title')}>${obj.title}</h2>
-              <span class="close">×</span>
-            </div>
-            <img src="${obj.image}" alt="${obj.alt}">
-            <div class="info-bar">
-              <div>
-                <small ${csDisplay(obj, 'credit')} class="bold">Credit:</small>
-                <small ${csDisplay(obj, 'credit')}> ${obj.credit}</small>
-              </div>
-              <small ${csOpacity(obj, 'urls')}>
-                <small class="bold">Links:</small>
-                 ${obj.urls ? Object.entries(obj.urls).map(o => `<a href="${o[1]}" target="_blank">${o[0]}</a>`).join(', ') : ''}
-              </small>
-            </div>
-            <div class="content">
-              ${obj.content ? obj.content.map(p => `<p>${p}</p>`).join('') : ''}
-              <br>
-              <small ${csDisplay(obj, 'alt')} class="bold">Media Caption:</small>
-              <small ${csDisplay(obj, 'alt')}>${obj.alt}</small>
-              <br>
-            </div>
-          `
+
+          popUpTemplate(cs, obj)
+
           setTimeout(() => cs.css('opacity', 1), 100)
           cs.querySelector('.close').addEventListener('click', () => {
             document.body.classList.remove('no-scroll')
@@ -117,6 +127,7 @@ window.loadCaseStudy = function (o) {
             setTimeout(() => cs.remove(), 800)
           })
         }
+
         // add content to grid
         addSyrupImgToGrid({ path: obj.image, ele1, ele2, callback })
 
