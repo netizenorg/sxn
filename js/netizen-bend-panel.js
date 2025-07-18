@@ -27,6 +27,7 @@ class NetizenBendPanel {
         <div class="row">
           <button type="button" name="close" class="sec-nav">close panel</button>
           <button type="button" name="reset" class="sec-nav">reset code</button>
+          <small style="margin-left: 20px;">THIS IS IN BETA (BUGS ABOUND)</small>
         </div>
       </div>
       <div id="editor"></div>
