@@ -6,7 +6,7 @@ window.colors = [
 ]
 
 window.data = null // contains all the content data
-let nav, splash, content, grid, bendPanel, subNav, subNavClr
+let nav, splash, content, grid, bendPanel, subNav
 
 // default settings for processed images
 // TODO: make customizable via bend panel
@@ -94,7 +94,7 @@ function resetGridAndContent (exceptInitatives) {
   nn.getAll('.grid').filter(d => d.id !== 'main-grid').forEach(d => d.remove())
 
   if (exceptInitatives) return
-  // reset initatives
+  // reset initiatives
   subNav.classList.remove('sub-nav')
   subNav.querySelectorAll('*').forEach(e => e.remove())
   // revert center cell-content to original colors
@@ -208,14 +208,12 @@ async function showInitiatives () {
   resetGridAndContent()
 
   subNav.className = 'sub-nav'
-  let subClass = 'sub-nav-item'
-  if (nn.isLight(subNavClr)) subClass += ' invert'
-  window.data._initativesOrder.forEach(proj => {
+  window.data._initiativesOrder.forEach(proj => {
     const key = proj.split('.')[0]
     const obj = window.data.initiatives[key]
     const item = nn.create('span')
       .content(obj.title)
-      .set('class', subClass)
+      .set('class', 'sub-nav-item')
       .set('name', key)
       .addTo(subNav)
       .on('click', () => window.loadCaseStudy(obj))
@@ -263,6 +261,25 @@ function showSupport () {
 // *.O                             main function                           *.O
 // *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 
+async function URLHandling () {
+  let hash = window.location.hash
+  if (hash.includes('#about')) {
+    nav.updatePage('about')
+    return 'ready'
+  } else if (hash.includes('#initiatives')) {
+    nav.updatePage('initiatives')
+    hash = hash.split('/')
+    if (hash.length > 1) {
+      await nn.sleep(1200)
+      nn.get(`.sub-nav-item[name="${hash[1]}"]`).click()
+      return 'ready'
+    }
+  } else if (hash.includes('#support')) {
+    nav.updatePage('about')
+    return 'ready'
+  }
+}
+
 function resize () {
   if (window.blockerTimer) {
     clearTimeout(window.blockerTimer)
@@ -283,9 +300,9 @@ function resize () {
 async function main () {
   // load initial data
   window.data = await loadData()
-  window.data._initativesOrder = [...window.data.initiatives]
+  window.data._initiativesOrder = [...window.data.initiatives]
   window.data.initiatives = {}
-  window.data._initativesOrder.forEach(async file => {
+  window.data._initiativesOrder.forEach(async file => {
     const res = await window.fetch(`data/initiatives/${file}`)
     const json = await res.json()
     const name = file.split('.')[0]
@@ -320,7 +337,6 @@ async function main () {
   content = new NetizenContentBlock()
   subNav = content.ele.children[0]
   subNav.className = 'sub-nav'
-  subNavClr = window.getComputedStyle(subNav).getPropertyValue('background-color')
 
   // setup main grid section
   grid = new NetizenGrid({
@@ -373,9 +389,22 @@ async function main () {
   })
 
   window.scrollTo({ top: 0, behavior: 'smooth' })
-  await nn.sleep(300)
-  nn.get('#loader').css('opacity', 0)
-  setTimeout(() => nn.get('#loader').css('display', 'none'), 800)
+  await nn.sleep(2000)
+
+  // check for window location logic
+  const total = window.data._initiativesOrder.length
+  const waitingForDataToLoad = setInterval(async () => {
+    const loaded = Object.keys(window.data.initiatives).length
+    if (loaded === total) { // if data is all loaded
+      clearInterval(waitingForDataToLoad)
+
+      await URLHandling()
+
+      nn.get('#loader').css('opacity', 0)
+      setTimeout(() => nn.get('#loader').css('display', 'none'), 800)
+    }
+    // ... otherwise, keep looping
+  }, 200)
 }
 
 nn.on('load', main)

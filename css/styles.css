@@ -4,6 +4,7 @@
   --blue: #0000ff;
   --hs: 7.5rem; /* header height size */
   --r: 5vw; /* radius for borders */
+  --tt: 0.8s; /* transition time */
 
   /* word‐spacing: 20px → 1.25rem (assuming 16px base) */
   /* --ws: 0.25rem; */
@@ -89,6 +90,14 @@ h3 {
   font-size: var(--fs-subtitle);
   line-height: var(--lh-subtitle);
   letter-spacing: var(--ls-subtitle);
+  margin-top: 0;
+}
+
+h4 {
+  font-size: var(--fs-body-web);
+  line-height: var(--lh-body-web);
+  word-spacing: var(--ws-body-web);
+  letter-spacing: var(--ls-body-web);
   margin-top: 0;
 }
 
@@ -201,7 +210,7 @@ blockquote:before {
 
   background: var(--prim-b);
   opacity: 1;
-  transition: opacity 0.8s var(--out-cubic);
+  transition: opacity var(--tt) var(--out-cubic);
 }
 
 #loader > img {
@@ -291,7 +300,7 @@ header .burger {
 
   width: 100vw;
   height: var(--splash-height);
-  transition: all 0.8s var(--out-cubic);
+  transition: all var(--tt) var(--out-cubic);
 
   background: var(--prim-b);
 }
@@ -334,7 +343,8 @@ header .burger {
 
 #content > div.sub-nav > .sub-nav-item {
   opacity: 0;
-  color: var(--prim-a);
+  color: var(--prim-b);
+  font-weight: 600;
   display: block;
   margin: 0;
 
@@ -344,26 +354,16 @@ header .burger {
   transition: opacity 0.4s var(--out-cubic);
 }
 
-#content > div.sub-nav > .sub-nav-item.invert{
-  color: var(--prim-b);
-}
 
 #content > div.sub-nav > .sub-nav-item:hover {
-  background: var(--prim-a);
-  color: var(--prim-b);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#content > div.sub-nav > .sub-nav-item.invert:hover {
-  background: var(--prim-b);
+  background: var(--blue);
   color: var(--prim-a);
+  cursor: pointer;;
 }
 
 #content > div.sub-nav > .sub-nav-item.selected {
-  background: var(--blue);
-  color: var(--prim-a);
-  font-weight: 600;
+  background: var(--prim-b);
+  color: var(--prim-a);;
 }
 
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
@@ -430,7 +430,7 @@ header .burger {
   z-index: 10;
   padding: var(--lh-title);
   margin: 0;
-  transition: opacity 0.8s var(--out-cubic);
+  transition: opacity var(--tt) var(--out-cubic);
   line-height: 1.75rem;
   max-width: 35rem;
 }
@@ -468,7 +468,7 @@ header .burger {
 
   padding: var(--lh-title);
   opacity: 0;
-  transition: opacity 0.8s var(--out-cubic);
+  transition: opacity var(--tt) var(--out-cubic);
 }
 
 .case-study-detail img {
@@ -481,11 +481,51 @@ header .burger {
 }
 
 .case-study-detail .close {
+  user-select: none;
   cursor: pointer;
-  font-size: 4.3rem;
+  font-size: var(--fs-tertiary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  border: 0.1rem solid var(--prim-b);
+  border-radius: var(--r);
+  padding: 0 0.7rem 0.1rem 0.7rem;
+  height: 1.7rem;
 }
 
-.case-study-detail .info-bar {
+.case-study-detail .close:hover {
+  color: var(--prim-a);
+  background: var(--prim-b);
+}
+
+.case-study-detail .close img {
+  height: var(--fs-tertiary);
+  margin: 0.1rem 0 0 0.5rem;
+}
+
+.case-study-detail .featured-image {
+  position: relative;
+}
+
+.case-study-detail .back-next-row {
+  position: absolute;
+  bottom: 25px;
+  left: 25px;
+}
+
+.case-study-detail .back-next-row img {
+  width: 50px;
+  background: var(--prim-b);
+  padding: 15px 17px;
+}
+
+.case-study-detail .back-next-row img:hover {
+  background: var(--blue);
+  cursor: pointer;
+}
+
+/* .case-study-detail .info-bar {
   display: flex;
   justify-content: space-between;
 }
@@ -497,10 +537,44 @@ header .burger {
 
 .case-study-detail .content p {
   margin: 0 0 1rem 0;
+} */
+
+.case-study-detail .content {
+  display: flex;
+  justify-content: space-between;
 }
 
-.case-study-detail .bold {
+.case-study-detail .content > div:nth-child(1) {
+  margin-left: 28%;
+  max-width: 42rem;
+  margin-bottom: 3rem;
+}
+
+.case-study-detail .content > div:nth-child(1) p {
+  margin-bottom: 1rem;
+}
+
+.case-study-detail .content > div:nth-child(2) {
+  max-width: 300px;
+}
+
+.case-study-detail .content > div:nth-child(2) > div {
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1486px) {
+  .case-study-detail .content {
+    flex-direction: column;
+  }
+
+  .case-study-detail .content > div:nth-child(2) {
+    margin-left: 28%;
+  }
+}
+
+.case-study-detail .bold-blue {
   font-weight: 600;
+  color: var(--blue);
 }
 
 /*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
@@ -532,7 +606,7 @@ header .burger {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: opacity 0.8s var(--out-cubic);
+  transition: opacity var(--tt) var(--out-cubic);
   cursor: pointer;
 }
 
@@ -552,7 +626,7 @@ header .burger {
   display: none; /* hide to start */
   height: 100%;
   opacity: 0;
-  transition: opacity 0.8s var(--out-cubic);
+  transition: opacity var(--tt) var(--out-cubic);
 }
 
 .bend-panel .options {

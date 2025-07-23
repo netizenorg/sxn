@@ -17,7 +17,7 @@ class NetizenBendPanel {
     })
 
     this.text.canvas.style.cursor = 'pointer'
-    this.text.canvas.style.transition = 'all 0.8s var(--out-cubic)'
+    this.text.canvas.style.transition = 'all var(--tt) var(--out-cubic)'
     this.text.canvas.onclick = () => this.togglePanel()
 
     // element for the bend panel itself

@@ -45,6 +45,7 @@ class NetizenNav {
   }
 
   updatePage (sec) {
+    window.location.hash = '#' + sec
     window.scrollTo({ top: 0, behavior: 'smooth' })
     if (sec === 'logo') this._deactivate()
     else this._activate(sec)

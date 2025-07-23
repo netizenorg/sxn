@@ -124,3 +124,5 @@ class NetizenBentText {
     })
   }
 }
+
+window.NetizenBentText = NetizenBentText

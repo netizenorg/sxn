@@ -150,7 +150,7 @@ class NetizenASCIISplash {
           position: 'absolute',
           pointerEvents: 'none',
           opacity: 0,
-          transition: 'opacity 0.8s var(--out-cubic)'
+          transition: 'opacity var(--tt) var(--out-cubic)'
         })
         .addTo(this.container)
       const octx = overlay.getContext('2d')
