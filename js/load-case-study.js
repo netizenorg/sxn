@@ -37,14 +37,14 @@ function popUpTemplate (cs, obj, proj) {
     <div class="title-bar">
       <h2>netizen.org/initiatives/${proj}</h2>
       <span class="close">
-        CLOSE <img src="../images/close.svg" alt="close pop up">
+        CLOSE <img src="images/close.svg" alt="close pop up">
       </span>
     </div>
     <div class="featured-image">
       <img src="${obj.image}" alt="${obj.alt}">
       <div class="back-next-row">
-        <img src="../images/left-arrow-white.svg" alt="previous pop up">
-        <img src="../images/right-arrow-white.svg" alt="next pop up">
+        <img src="images/left-arrow-white.svg" alt="previous pop up">
+        <img src="images/right-arrow-white.svg" alt="next pop up">
       </div>
     </div>
     <div class="content">
@@ -75,7 +75,6 @@ function popUpTemplate (cs, obj, proj) {
 window.caseStudyPopUpLogic = (idx) => {
   window.casesIdx = idx
   const obj = window.cases[idx]
-  console.log('idx', window.casesIdx);
   // console.log('obj', obj);
 
   const next = () => {
@@ -92,7 +91,7 @@ window.caseStudyPopUpLogic = (idx) => {
 
   const closeXColor = (t) => {
     const n = t === 'white' ? 'close-white' : 'close'
-    cs.querySelector('.close img').src = `../images/${n}.svg`
+    cs.querySelector('.close img').src = `images/${n}.svg`
   }
 
   const close = () => {
