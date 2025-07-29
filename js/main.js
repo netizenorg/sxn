@@ -207,7 +207,7 @@ async function showInitiatives () {
 
   resetGridAndContent()
 
-  subNav.className = 'sub-nav'
+  subNav.classList.add('sub-nav')
   window.data._initiativesOrder.forEach(proj => {
     const key = proj.split('.')[0]
     const obj = window.data.initiatives[key]
@@ -286,6 +286,9 @@ function resize () {
     clearTimeout(window.killLoader)
   }
 
+  if (nn.width < 900) bendPanel.disable()
+  else bendPanel.enable()
+
   nn.get('#loader').css('display', 'flex')
   nn.get('#loader').css('opacity', 1)
 
@@ -298,6 +301,7 @@ function resize () {
 }
 
 async function main () {
+  if (nn.isMobile()) window.location = 'mobile.html'
   // load initial data
   window.data = await loadData()
   window.data._initiativesOrder = [...window.data.initiatives]
@@ -336,7 +340,7 @@ async function main () {
   // setup content section (displays over the splash + above the grid)
   content = new NetizenContentBlock()
   subNav = content.ele.children[0]
-  subNav.className = 'sub-nav'
+  subNav.classList.add('sub-nav')
 
   // setup main grid section
   grid = new NetizenGrid({
@@ -373,6 +377,8 @@ async function main () {
       })
     }
   })
+
+  if (nn.width < 900) bendPanel.disable()
 
   // popualte the inital grid
   loadASCIIArt({

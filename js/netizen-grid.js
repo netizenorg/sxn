@@ -44,6 +44,13 @@ class NetizenGrid {
     ]
 
     this.generateGrid(this.grid)
+
+    if (!window.colors) {
+      window.colors = [
+        ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
+        ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
+      ]
+    }
   }
 
   getBlock (num) {
@@ -80,6 +87,7 @@ class NetizenGrid {
 
     nn.create('div')
       .css({
+        position: 'absolute',
         left: `${leftPct}%`,
         top: `${topPct}%`,
         width: `${widthPct}%`,
@@ -178,7 +186,6 @@ class NetizenGrid {
         const onEnd = () => {
           child.removeEventListener('transitionend', onEnd)
           child.parentNode && child.parentNode.removeChild(child)
-          console.log('removed', child);
         }
         child.addEventListener('transitionend', onEnd)
       })

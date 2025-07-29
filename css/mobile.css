@@ -1,0 +1,49 @@
+#loader {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: var(--prim-b);
+  opacity: 1;
+  transition: opacity var(--tt) var(--out-cubic);
+}
+
+#loader > img {
+  max-width: 60%;
+}
+
+#netizen-logo {
+  width: 25vw;
+  margin: 1rem;
+}
+
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+/*.O                               example grid                          *.O */
+/*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O */
+
+
+.grid {
+  position: relative;
+  width: 100vw;
+  height: calc(100vw * 0.75);
+}
+
+/*
+  @jon, u mentioned u only wanted the grid as a decorative item, BUT if u do
+  want to put content in it like background images, then u might want to
+  uncomment the code below for similar behavior to desktop site
+*/
+.grid > div {
+  /* overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat; */
+}
