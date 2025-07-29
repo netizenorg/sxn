@@ -1,36 +1,14 @@
-/* global nn, NetizenGrid */
-window.colors = [
-  ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
-  ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
-]
-
-window.data = null // this will contain all our content data (once loaded)
-let grid
-
+/* global nn, NetizenGrid, loadData */
 /*
 *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 ..............................................................................
-    Hi jon! any simple javascript functions can go BELOW this comment
-    (any complex fucntions or classes should go in their own files)
+    Hi jon! any variables or simple javascript functions can go below this
+    comment (any complex fucntions or classes should go in their own files)
 ..............................................................................
 *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 */
 
-// this helper function is for loading our data form the data folder
-async function loadData () {
-  const res = await window.fetch('data/main.json')
-  if (!res.ok) throw new Error(`Failed to load data: ${res.status}`)
-  return await res.json()
-}
-
-/*
-*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
-..............................................................................
-    Hi jon! any simple javascript functions can go ABOVE this comment
-    (any complex fucntions or classes should go in their own files)
-..............................................................................
-*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
-*/
+let grid // i put this variable here so it can be accessed in any function u make (not just main)
 
 //
 // -----------------------------------------------------------------------------
@@ -38,23 +16,6 @@ async function loadData () {
 // this runs as soon as the page loads
 async function main () {
   if (!nn.isMobile()) window.location = 'index.html'
-
-  // This part loads all our data from the data folder
-  // && structures it all in a userful way into "window.data"
-  window.data = await loadData()
-  window.data._initiativesOrder = [...window.data.initiatives]
-  window.data.initiatives = {}
-  window.data._initiativesOrder.forEach(async file => {
-    const res = await window.fetch(`data/initiatives/${file}`)
-    const json = await res.json()
-    const name = file.split('.')[0]
-    window.data.initiatives[name] = json
-    window.data.initiatives[name].name = name
-  })
-
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-  // await nn.sleep(1000) // load buffer (change as needed)
-
   /*
   *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
   ..............................................................................
@@ -63,8 +24,16 @@ async function main () {
   *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
   */
 
+  // This part loads all our data from the data folder
+  // && structures it all in a userful way into "window.data" (see docs)
+  window.data = await loadData()
+
+  // little mobile hack...
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  // here's a grid! (see docs to learn more)
   grid = new NetizenGrid({
-    selector: '.grid'
+    selector: '#example-grid'
   })
 
   /*
@@ -74,6 +43,9 @@ async function main () {
   ..............................................................................
   *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
   */
+
+  // little hack if u want to add a little wait time to the loader
+  // await nn.sleep(1000) // load buffer (change as needed)
 
   // this part waits for all the data to be fully loaded
   // && once it is it removes the loader

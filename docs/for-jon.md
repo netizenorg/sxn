@@ -25,7 +25,7 @@ for all the reasons discussed in our meeting, i've separated out the code for th
 - `css/mobile.css` file for mobile specific CSS rules
 
 
-i know u mentioned not having worked on an SPA before, but it's easeir than it might seem (if u don't mind a little JavaScript), i created a basic demo below in the "netnet standard library" section. but if u feel like we need to add new directories to the project architecture for the mobile site, i'd suggest we prefix them with `mobile-`, while testing this of course means u'll have to navigate to an ugly looking URL, but seeing as how i've got to work on custom logic for the URL routing we'll be able to change this once we deploy to our server. Just keep track of what u want the actual URLs to look like to the public && i'll make sure to implement that on the server side before we launch.
+i know u mentioned not having worked on an SPA before, but it's easier than it might seem (if u don't mind a little JavaScript), i created a basic demo below in the "netnet standard library" section. but if u feel like we need to add new directories to the project architecture for the mobile site, i'd suggest we prefix them with `mobile-`, while testing this of course means u'll have to navigate to an ugly looking URL, but seeing as how i've got to work on custom logic for the URL routing we'll be able to change this once we deploy to our server. Just keep track of what u want the actual URLs to look like to the public && i'll make sure to implement that on the server side before we launch.
 
 
 ## Database
@@ -34,11 +34,11 @@ All of the website's text content is stored (apart from meta tag data, b/c that 
 
 It also means we can use GitHub as a cheap CMS, at any point we can edit the files directly on GitHub if we want to make any copy edits && then deploy the site to update. (if at some point we want to create some simple web interface CMS for ourselves i can separate these files out && keep them server-side only).
 
-`main.js` contains all the copy for the "about", "initiatives" && "support" section, as well as a list of the "initiatives" we want published live as well as the images to get randomly displayed on our splash/hero section (of the desktop, but we could also use this list for mobile).
+`main.json` contains all the copy for the "about", "initiatives" && "support" section, as well as a list of the "initiatives" we want published live as well as the images to get randomly displayed on our splash/hero section (of the desktop, but we could also use this list for mobile).
 
 `initiatives`, the initiatives folder contains one file for each case-study, all the content follows the same structure (should be fairly obvious what that is after taking a look at em).
 
-to access this data in the JavaScript code u can do something like this:
+assuming that u've run the `loadData()` function (which i included in the `mobile.js` file in the load function),u can access this data in the JavaScript code like this:
 ```js
 window.data.splashImages // array of all the header images
 
@@ -192,33 +192,8 @@ Once u've created a grid && stored in a variable u can do things with that grid 
 
 ## ASCII Art
 
-Here's the function i made for the desktop version to add ASCII art files from the `ascii-art` folder into specific elements on the page. If u want to use it copy+paste the function below in ur `js/mobile.js` file
+There's a utility function called `loadASCIIArt()` in the `js/utils.js` file (which is included in the mobile template i made) which can be used to load any of the ASCII drawings saved in the `ascii-art` folder. to use it, u pass a settings object with two parameters, the `path` to the txt file && a reference to the `parent` element u want to inject the ASCII art into, for example:
 ```js
-async function loadASCIIArt (o) {
-  try {
-    const res = await window.fetch(o.path)
-    if (!res.ok) throw new Error(`Failed to fetch ${o.path}: ${res.status} ${res.statusText}`)
-    const ascii = await res.text()
-    const asciiFrame = nn.create('div').css(asciiBlockCSS).addTo(o.parent)
-    const color = nn.isLight(o.parent.style.backgroundColor) ? '#000' : '#fff'
-    const styles = o.css || {}
-    styles.color = color
-    const ele = nn.create('pre')
-      .content(ascii)
-      .addTo(asciiFrame)
-      .css(styles)
-    if (o.link) ele.on('click', () => window.open(o.link, '_blank'))
-    return ele
-  } catch (err) {
-    console.error('loadTextFile error:', err)
-    throw err
-  }
-}
-```
-
-Then to use that function u can do something like this:
-```js
-
 const ascii = await loadASCIIArt({
   path: 'ascii-art/netnet.txt', // which ascii file
   parent: nn.get('#some-div'), // where do u want to put it
@@ -272,7 +247,7 @@ There are four different "syrup" layers which get applied by default:
 1. `huffhack` this is the "glitch" layer, where i hack the huffman codes in the header of the jpg file to corrupt the image (keep in mind, this is a "feral" glitch, so it won't look the same on all browsers)
 2. `dither` this layer creates a dithered version of the image
 4. `pixelate` this layer creates a pixelated version of the image
-5. `acii` this layer creates an ASCII version of the image using the netizen logo characters `*.O` (but this can be edited)
+5. `ascii` this layer creates an ASCII version of the image using the netizen logo characters `*.O` (but this can be edited)
 
 all the layers are on by default, but u can modify any of their properties by passing a settings object for each. all the layers have their own specific settings, but they all share at least these three properties:
 ```js
