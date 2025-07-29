@@ -225,6 +225,7 @@ class NetizenSyrupImage {
       const imgEle = (this.ele.querySelector('img[name="huffhack"]'))
         ? this.ele.querySelector('img[name="huffhack"]') : nn.create('img')
       const css = {
+        position: 'absolute',
         zIndex: this.huffhack.zIndex || 1,
         opacity: typeof this.huffhack.opacity === 'number' ? this.huffhack.opacity : 0.5,
         display: 'block'
@@ -306,6 +307,7 @@ class NetizenSyrupImage {
       ? this.ele.querySelector('img[name="pixelate"]') : nn.create('img')
     const url = outCanvas.toDataURL()
     const css = {
+      position: 'absolute',
       zIndex: this.pixelate.zIndex || 2,
       opacity: typeof this.pixelate.opacity === 'number' ? this.pixelate.opacity : 0.5,
       display: 'block'
@@ -456,6 +458,7 @@ class NetizenSyrupImage {
     const imgEle = this.ele.querySelector('img[name="dither"]')
       ? this.ele.querySelector('img[name="dither"]') : nn.create('img')
     const css = {
+      position: 'absolute',
       zIndex: this.dither.zIndex || 3,
       opacity: typeof this.dither.opacity === 'number'
         ? this.dither.opacity : 0.5,
@@ -527,6 +530,7 @@ class NetizenSyrupImage {
       ? this.ele.querySelector('img[name="ascii"]')
       : nn.create('img')
     const css = {
+      position: 'absolute',
       zIndex: this.ascii.zIndex || 4,
       opacity: typeof this.ascii.opacity === 'number'
         ? this.ascii.opacity
