@@ -43,14 +43,14 @@ class NetizenGrid {
       { x: 4, y: 3, w: 2, h: 1 }
     ]
 
-    this.generateGrid(this.grid)
-
     if (!window.colors) {
       window.colors = [
         ['#ff9999', '#ff99cc', '#ff99ff', '#cc99ff', '#9999ff', '#99ccff', '#99ffff', '#99ffcc', '#99ff99', '#ccff99', '#ffff99', '#ffcc99'],
         ['#993333', '#993366', '#993399', '#663399', '#333399', '#336699', '#339999', '#339966', '#339933', '#669933', '#999933', '#996633']
       ]
     }
+
+    this.generateGrid(this.grid)
   }
 
   getBlock (num) {
