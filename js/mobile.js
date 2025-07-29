@@ -7,6 +7,15 @@ window.colors = [
 window.data = null // this will contain all our content data (once loaded)
 let grid
 
+/*
+*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+..............................................................................
+    Hi jon! any simple javascript functions can go BELOW this comment
+    (any complex fucntions or classes should go in their own files)
+..............................................................................
+*.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
+*/
+
 // this helper function is for loading our data form the data folder
 async function loadData () {
   const res = await window.fetch('data/main.json')
@@ -17,12 +26,16 @@ async function loadData () {
 /*
 *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 ..............................................................................
-    Hi jon! any simple javascript functions can go above or below this comment
+    Hi jon! any simple javascript functions can go ABOVE this comment
     (any complex fucntions or classes should go in their own files)
 ..............................................................................
 *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O *.O
 */
 
+//
+// -----------------------------------------------------------------------------
+//                                                            THE MAIN FUCNCTION
+// this runs as soon as the page loads
 async function main () {
   if (!nn.isMobile()) window.location = 'index.html'
 
