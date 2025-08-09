@@ -395,6 +395,7 @@ header .burger {
 
 .case-study-detail .content > div:nth-child(2) {
   max-width: 300px;
+  margin-top: 1rem;
 }
 
 .case-study-detail .content > div:nth-child(2) > div {
